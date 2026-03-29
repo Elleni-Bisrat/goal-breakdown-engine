@@ -1,8 +1,22 @@
+import dotenv from "dotenv";
 import app from "./app.js";
 import connectDB from "./config/db.js";
 
-const PORT = process.env.PORT || 5001;
+// Load environment variables
+dotenv.config();
+
+// Connect to database
 connectDB();
-app.listen(PORT, () => {
-  console.log(`server is running on port ${PORT}`);
+
+const PORT = process.env.PORT || 5001;
+
+// Start server
+const server = app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
+
+// Handle unhandled promise rejections (important)
+process.on("unhandledRejection", (err) => {
+  console.error(`❌ Error: ${err.message}`);
+  server.close(() => process.exit(1));
 });
