@@ -1,10 +1,15 @@
 export const validateSignup = (req, res, next) => {
-    const { email, password } = req.body;
+    const { username, email, password, confirmPassword } = req.body;
 
-    if (!email || !password) {
+    if (!email || !username || !password || !confirmPassword) {
         res.status(400);
-        throw new Error("Email and password are required");
+        throw new Error("All fields are required");
     }
+
+   if (username.trim().length < 3) {
+     res.status(400);
+     throw new Error("Username must be at least 3 characters");
+         }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
@@ -21,6 +26,11 @@ export const validateSignup = (req, res, next) => {
     if (!strongPasswordRegex.test(password)) {
         res.status(400);
         throw new Error("Password must contain letters and numbers");
+    }
+    
+    if (password !== confirmPassword) {
+    res.status(400);
+    throw new Error("Passwords do not match");
     }
 
     next();
