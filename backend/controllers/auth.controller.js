@@ -36,6 +36,7 @@ export const signUp = async (req, res, next) => {
     next(error);
   }
 };
+
 export const signIn = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -58,6 +59,16 @@ export const signIn = async (req, res, next) => {
       token,
       userId: user._id,
       message: "sign in successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+export const logout = async (req, res, next) => {
+  try {
+    res.status(200).json({
+      success: true,
+      message: "Logged out successfully."
     });
   } catch (error) {
     next(error);
