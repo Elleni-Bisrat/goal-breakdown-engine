@@ -4,6 +4,7 @@ import authRoutes from "./routes/auth.routes.js";
 import goalRoutes from "./routes/goal.routes.js";
 import taskRoutes from "./routes/task.routes.js";
 import progressRoutes from "./routes/progress.routes.js";
+import goalRoutes from "./routes/goalRoutes.js";
 
 const app = express();
 app.use(cors());
@@ -12,6 +13,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/goals", goalRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/progress", progressRoutes);
+// Routes
+app.use("/api/goals", goalRoutes);
 
 app.get("/", (req, res) => {
   res.send("Goal Breakdown API running...");
