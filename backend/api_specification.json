@@ -1,0 +1,358 @@
+{
+  "project": {
+    "name": "Goal Breakdown Engine",
+    "version": "1.0.0",
+    "baseUrl": "http://localhost:5000/api",
+    "description": "API specification for Goal Breakdown Engine mobile app"
+  },
+  "authentication": {
+    "type": "Bearer Token",
+    "howTo": "After login, include token in all requests as Authorization header",
+    "headerFormat": "Authorization: Bearer YOUR_TOKEN_HERE",
+    "tokenStorage": "Store token in secure storage (SharedPreferences/AsyncStorage)"
+  },
+  "endpoints": {
+    "auth": {
+      "signup": {
+        "method": "POST",
+        "url": "/auth/signup",
+        "description": "Create new user account",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "name": "string (required) - User's full name",
+          "email": "string (required) - Valid email address",
+          "password": "string (required) - Min 6 characters"
+        },
+        "exampleRequest": {
+          "name": "John Doe",
+          "email": "john@example.com",
+          "password": "123456"
+        },
+        "exampleResponse": {
+          "_id": "65abc123def456...",
+          "name": "John Doe",
+          "email": "john@example.com",
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        }
+      },
+      "login": {
+        "method": "POST",
+        "url": "/auth/login",
+        "description": "Login existing user",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "email": "string (required)",
+          "password": "string (required)"
+        },
+        "exampleRequest": {
+          "email": "john@example.com",
+          "password": "123456"
+        },
+        "exampleResponse": {
+          "_id": "65abc123def456...",
+          "name": "John Doe",
+          "email": "john@example.com",
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        }
+      }
+    },
+    "goals": {
+      "createGoal": {
+        "method": "POST",
+        "url": "/goals",
+        "description": "Create a new goal with AI-generated tasks",
+        "headers": {
+          "Authorization": "Bearer {{token}}",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "title": "string (required) - Goal title",
+          "description": "string (optional) - Goal description",
+          "startDate": "string (required) - YYYY-MM-DD format",
+          "endDate": "string (required) - YYYY-MM-DD format",
+          "priority": "string (optional) - low, medium, high (default: medium)"
+        },
+        "exampleRequest": {
+          "title": "Learn Flutter",
+          "description": "Become proficient in Flutter development",
+          "startDate": "2026-04-01",
+          "endDate": "2026-05-30",
+          "priority": "high"
+        },
+        "exampleResponse": {
+          "goal": {
+            "_id": "69c947034e0f14f05913c24b",
+            "userId": "69c92e71ee96c90904de8e5e",
+            "title": "Learn Flutter",
+            "description": "Become proficient in Flutter development",
+            "startDate": "2026-04-01T00:00:00.000Z",
+            "endDate": "2026-05-30T00:00:00.000Z",
+            "priority": "high",
+            "status": "active",
+            "milestones": [
+              {
+                "title": "Week 1: Setup & Fundamentals",
+                "startDate": "2026-04-01T00:00:00.000Z",
+                "endDate": "2026-04-07T00:00:00.000Z",
+                "completed": false
+              }
+            ]
+          },
+          "tasks": [
+            {
+              "_id": "69c947074e0f14f05913c250",
+              "title": "Day 1: Install Flutter SDK",
+              "description": "Download and set up Flutter development environment",
+              "dueDate": "2026-04-01T00:00:00.000Z",
+              "status": "pending",
+              "milestoneIndex": 0
+            }
+          ],
+          "summary": {
+            "totalDays": 60,
+            "totalMilestones": 9,
+            "totalTasks": 60,
+            "generationMethod": "Gemini AI"
+          }
+        }
+      },
+      "getAllGoals": {
+        "method": "GET",
+        "url": "/goals",
+        "description": "Get all goals for logged-in user",
+        "headers": {
+          "Authorization": "Bearer {{token}}"
+        },
+        "exampleResponse": [
+          {
+            "_id": "69c947034e0f14f05913c24b",
+            "title": "Learn Flutter",
+            "description": "Become proficient in Flutter development",
+            "startDate": "2026-04-01T00:00:00.000Z",
+            "endDate": "2026-05-30T00:00:00.000Z",
+            "priority": "high",
+            "status": "active"
+          }
+        ]
+      },
+      "getGoalById": {
+        "method": "GET",
+        "url": "/goals/:goalId",
+        "description": "Get single goal with all its tasks",
+        "headers": {
+          "Authorization": "Bearer {{token}}"
+        },
+        "urlParams": {
+          "goalId": "string - The goal ID"
+        },
+        "exampleResponse": {
+          "goal": {
+            "_id": "69c947034e0f14f05913c24b",
+            "title": "Learn Flutter",
+            "milestones": []
+          },
+          "tasks": []
+        }
+      }
+    },
+    "tasks": {
+      "getTasksByGoal": {
+        "method": "GET",
+        "url": "/tasks/:goalId",
+        "description": "Get all tasks for a specific goal",
+        "headers": {
+          "Authorization": "Bearer {{token}}"
+        },
+        "urlParams": {
+          "goalId": "string - The goal ID"
+        },
+        "exampleResponse": [
+          {
+            "_id": "69c947074e0f14f05913c250",
+            "goalId": "69c947034e0f14f05913c24b",
+            "title": "Day 1: Install Flutter SDK",
+            "description": "Download and set up Flutter development environment",
+            "dueDate": "2026-04-01T00:00:00.000Z",
+            "status": "pending",
+            "milestoneIndex": 0
+          }
+        ]
+      },
+      "updateTask": {
+        "method": "PUT",
+        "url": "/tasks/:taskId",
+        "description": "Update a task (mark complete, edit title, etc.)",
+        "headers": {
+          "Authorization": "Bearer {{token}}",
+          "Content-Type": "application/json"
+        },
+        "urlParams": {
+          "taskId": "string - The task ID"
+        },
+        "body": {
+          "title": "string (optional) - New title",
+          "description": "string (optional) - New description",
+          "dueDate": "string (optional) - New due date",
+          "status": "string (optional) - pending or completed"
+        },
+        "exampleRequest": {
+          "status": "completed"
+        },
+        "exampleResponse": {
+          "_id": "69c947074e0f14f05913c250",
+          "title": "Day 1: Install Flutter SDK",
+          "status": "completed",
+          "updatedAt": "2026-03-29T15:36:39.224Z"
+        }
+      },
+      "deleteTask": {
+        "method": "DELETE",
+        "url": "/tasks/:taskId",
+        "description": "Delete a task",
+        "headers": {
+          "Authorization": "Bearer {{token}}"
+        },
+        "urlParams": {
+          "taskId": "string - The task ID"
+        },
+        "exampleResponse": {
+          "message": "Task deleted successfully"
+        }
+      },
+      "getTodayTasks": {
+        "method": "GET",
+        "url": "/tasks/today",
+        "description": "Get all pending tasks due today",
+        "headers": {
+          "Authorization": "Bearer {{token}}"
+        },
+        "exampleResponse": [
+          {
+            "_id": "69c947074e0f14f05913c250",
+            "title": "Day 1: Install Flutter SDK",
+            "description": "Download and set up Flutter development environment",
+            "dueDate": "2026-04-01T00:00:00.000Z",
+            "status": "pending",
+            "goalId": {
+              "_id": "69c947034e0f14f05913c24b",
+              "title": "Learn Flutter"
+            }
+          }
+        ]
+      }
+    },
+    "progress": {
+      "getGoalProgress": {
+        "method": "GET",
+        "url": "/progress/:goalId",
+        "description": "Get progress statistics for a specific goal",
+        "headers": {
+          "Authorization": "Bearer {{token}}"
+        },
+        "urlParams": {
+          "goalId": "string - The goal ID"
+        },
+        "exampleResponse": {
+          "goalId": "69c947034e0f14f05913c24b",
+          "goalTitle": "Learn Flutter",
+          "totalTasks": 60,
+          "completedTasks": 15,
+          "pendingTasks": 45,
+          "completionPercentage": 25,
+          "daysRemaining": 45,
+          "milestoneProgress": [
+            {
+              "title": "Week 1: Setup & Fundamentals",
+              "completed": 5,
+              "total": 7,
+              "percentage": 71
+            }
+          ]
+        }
+      },
+      "getDashboardProgress": {
+        "method": "GET",
+        "url": "/progress/dashboard",
+        "description": "Get overall progress across all goals",
+        "headers": {
+          "Authorization": "Bearer {{token}}"
+        },
+        "exampleResponse": {
+          "totalGoals": 3,
+          "totalTasks": 150,
+          "completedTasks": 45,
+          "overallProductivity": 30,
+          "goalsProgress": [
+            {
+              "goalId": "69c947034e0f14f05913c24b",
+              "title": "Learn Flutter",
+              "totalTasks": 60,
+              "completedTasks": 15,
+              "percentage": 25
+            }
+          ]
+        }
+      }
+    }
+  },
+  "dataModels": {
+    "user": {
+      "id": "string - Unique identifier",
+      "name": "string - User's full name",
+      "email": "string - User's email address",
+      "token": "string - JWT token for authentication",
+      "createdAt": "date - Account creation date"
+    },
+    "goal": {
+      "id": "string - Unique identifier",
+      "userId": "string - Reference to user",
+      "title": "string - Goal title",
+      "description": "string - Goal description",
+      "startDate": "date - Start date",
+      "endDate": "date - End date",
+      "priority": "enum['low','medium','high'] - Priority level",
+      "status": "enum['active','completed','archived'] - Goal status",
+      "milestones": "array - List of weekly milestones",
+      "createdAt": "date - Creation date"
+    },
+    "task": {
+      "id": "string - Unique identifier",
+      "goalId": "string - Reference to goal",
+      "userId": "string - Reference to user",
+      "title": "string - Task title",
+      "description": "string - Task description",
+      "dueDate": "date - Due date",
+      "status": "enum['pending','completed'] - Task status",
+      "milestoneIndex": "number - Which milestone this task belongs to",
+      "createdAt": "date - Creation date"
+    }
+  },
+  "errorResponses": {
+    "400": {
+      "message": "Bad Request - Invalid input data"
+    },
+    "401": {
+      "message": "Unauthorized - Invalid or missing token"
+    },
+    "404": {
+      "message": "Not Found - Resource doesn't exist"
+    },
+    "500": {
+      "message": "Internal Server Error"
+    }
+  },
+  "flutterIntegration": {
+    "dependencies": [
+      "http: ^1.1.0 - For API calls",
+      "shared_preferences: ^2.2.2 - For storing token",
+      "intl: ^0.18.1 - For date formatting",
+      "provider: ^6.0.5 - For state management"
+    ],
+    "apiServiceExample": "class ApiService { final String baseUrl = 'http://localhost:5000/api'; Future<String?> getToken() async { final prefs = await SharedPreferences.getInstance(); return prefs.getString('token'); } Future<Map<String, dynamic>> post(String endpoint, Map<String, dynamic> data) async { final token = await getToken(); final response = await http.post( Uri.parse('$baseUrl/$endpoint'), headers: { 'Authorization': 'Bearer $token', 'Content-Type': 'application/json' }, body: jsonEncode(data) ); return jsonDecode(response.body); } }",
+    "storageExample": "// Save token after login: final prefs = await SharedPreferences.getInstance(); await prefs.setString('token', response['token']); // Get token: final token = prefs.getString('token'); // Remove token on logout: await prefs.remove('token');"
+  }
+}

@@ -23,14 +23,11 @@ export const generateAIBreakdown = async (goalTitle, goalDescription, startDate,
     }
 
     const weeks = Math.ceil(totalDays / 7);
-    
     const prompt = `
       You are an expert goal planning assistant. Create a detailed breakdown for the following goal:
-      
       GOAL: "${goalTitle}"
       DESCRIPTION: "${goalDescription || 'No description provided'}"
       TIMEFRAME: ${totalDays} days (from ${new Date(startDate).toLocaleDateString()} to ${new Date(endDate).toLocaleDateString()})
-      
       IMPORTANT RULES:
       1. Create ${weeks} weekly milestones
       2. Create ${totalDays} daily tasks (one for each day)
@@ -47,7 +44,7 @@ export const generateAIBreakdown = async (goalTitle, goalDescription, startDate,
       }
     `;
 
-    console.log("🤖 Calling Gemini API for goal:", goalTitle);
+    console.log("Calling Gemini API for goal:", goalTitle);
 
     const response = await ai.models.generateContent({
       model: 'gemini-2.0-flash-exp',
