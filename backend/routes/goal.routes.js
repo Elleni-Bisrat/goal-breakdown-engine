@@ -4,8 +4,11 @@ import {
   createGoal,
   getGoals,
   getGoalById,
+  updateGoal,
+  deleteGoal,
   manualBreakdown,
 } from "../controllers/goal.controller.js";
+
 const goalRoutes = express.Router();
 
 goalRoutes.use(protect);
@@ -13,6 +16,8 @@ goalRoutes.use(protect);
 goalRoutes.post("/", createGoal);
 goalRoutes.get("/", getGoals);
 goalRoutes.get("/:id", getGoalById);
+goalRoutes.put("/:id", updateGoal);
+goalRoutes.delete("/:id", deleteGoal);
 goalRoutes.post("/breakdown", manualBreakdown);
 
 export default goalRoutes;
