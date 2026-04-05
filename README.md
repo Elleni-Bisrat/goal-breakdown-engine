@@ -30,35 +30,7 @@ Atomize is a mobile productivity app built with **Flutter**  and **Node** that h
 * REST API built with Node.js & Express
 * JWT-based authentication
 * MongoDB database
-
 ---
-
-## ⚙️ Setup (Frontend)
-
-```bash
-git clone https://github.com/your-username/atomize.git
-cd atomize
-flutter pub get
-flutter run
-```
-
----
-
-## 🔑 API Usage
-
-* Base URL: `http://localhost:5000/api`
-* Auth endpoints:
-
-  * `POST /auth/signup`
-  * `POST /auth/login`
-
----
-
-## 🚧 Status
-
-* ✅ UI Design Completed
-* 🚧 Backend Integration in Progress
-* ⚠️ Authentication Fix Ongoing
 
 ---
 
@@ -68,4 +40,4 @@ To help users stay consistent and achieve their goals **one day at a time**.
 
 ---
 
-## ❤️ Built With Passion
+## Built With Passion
