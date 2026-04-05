@@ -64,7 +64,14 @@ class _MainShellState extends State<MainShell> {
         ),
         bottomNavigationBar: NavigationBar(
           selectedIndex: _index,
-          onDestinationSelected: (i) => setState(() => _index = i),
+          onDestinationSelected: (i) {
+            setState(() => _index = i);
+            // Goals tab: ensure list loads when opening the tab (IndexedStack
+            // may have kept the subtree inactive; also covers missed initial load).
+            if (i == 2) {
+              context.read<GoalsBloc>().add(const GoalsLoadRequested());
+            }
+          },
           destinations: const [
             NavigationDestination(
               icon: Icon(Icons.home_outlined),

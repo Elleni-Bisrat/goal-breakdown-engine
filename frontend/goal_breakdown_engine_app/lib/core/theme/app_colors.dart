@@ -14,4 +14,9 @@ class AppColors {
   static const Color greenStat = Color(0xFF5CB87A);
   static const Color blueStat = Color(0xFF5B8DEF);
   static const Color outlineMuted = Color(0xFFE0E3EB);
+
+  /// Splash / first-launch screens (distinct from in-app primary).
+  static const Color splashDeep = Color(0xFF152B52);
+  static const Color splashMid = Color(0xFF2D4A7C);
+  static const Color splashAccent = Color(0xFF2EC4B6);
 }

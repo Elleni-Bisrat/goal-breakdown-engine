@@ -109,9 +109,13 @@ class MyTasksScreen extends StatelessWidget {
                       children: [
                         Material(
                           color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(16),
-                          elevation: 0,
-                          shadowColor: AppColors.primary.withValues(alpha: 0.35),
+                          elevation: 4,
+                          shadowColor: AppColors.primary.withValues(alpha: 0.4),
+                          surfaceTintColor: Colors.transparent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          clipBehavior: Clip.antiAlias,
                           child: InkWell(
                             borderRadius: BorderRadius.circular(16),
                             onTap: () => context

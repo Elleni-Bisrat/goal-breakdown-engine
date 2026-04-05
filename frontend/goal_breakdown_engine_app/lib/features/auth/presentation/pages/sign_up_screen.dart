@@ -50,12 +50,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
           children: [
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(24, 48, 24, 32),
+              padding: const EdgeInsets.fromLTRB(24, 44, 24, 28),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
+                gradient: const LinearGradient(
                   colors: [
-                    AppColors.primary,
-                    AppColors.secondary,
+                    AppColors.splashMid,
+                    AppColors.splashAccent,
                   ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -65,25 +65,38 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.22),
+                    color: AppColors.splashMid.withValues(alpha: 0.28),
                     blurRadius: 18,
                     offset: const Offset(0, 8),
                   ),
                 ],
               ),
-              child: const SafeArea(
+              child: SafeArea(
                 bottom: false,
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Create Your Account',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 26,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.4,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Create Your Account',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 26,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.4,
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'One account for your goals, tasks, and progress. '
+                      'After sign-up you can add goals with dates and priority.',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.92),
+                        fontSize: 14,
+                        height: 1.4,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
