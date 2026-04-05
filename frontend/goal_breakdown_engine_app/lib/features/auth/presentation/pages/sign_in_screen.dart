@@ -126,8 +126,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                     ? null
                                     : () {
                                         if (_formKey.currentState?.validate() !=
-                                            true)
+                                            true) {
                                           return;
+                                        }
                                         context.read<AuthBloc>().add(
                                           AuthLoginSubmitted(
                                             email: _email.text,

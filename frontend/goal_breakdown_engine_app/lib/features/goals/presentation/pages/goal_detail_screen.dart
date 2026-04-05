@@ -8,11 +8,6 @@ import 'package:goal_breakdown_engine_app/features/goals/presentation/bloc/goals
 class GoalDetailScreen extends StatelessWidget {
   const GoalDetailScreen({super.key});
 
-  String _estimateLabel(int durationDays) {
-    final months = (durationDays / 30).ceil().clamp(1, 36);
-    return '~$months month${months == 1 ? '' : 's'} estimated';
-  }
-
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<GoalDetailCubit, GoalDetailState>(
@@ -52,6 +47,7 @@ class GoalDetailScreen extends StatelessWidget {
           body: ListView(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
             children: [
+              // Progress section
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -83,23 +79,145 @@ class GoalDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(width: 20),
                   Expanded(
-                    child: Text(
-                      '${_estimateLabel(s.goal.duration)}\n'
-                      '${s.progress.completedTasks}/${s.progress.totalTasks} tasks done',
-                      style: TextStyle(
-                        height: 1.4,
-                        color: Colors.grey.shade800,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _getDurationLabel(s.goal.startDate, s.goal.endDate),
+                          style: TextStyle(
+                            height: 1.4,
+                            color: Colors.grey.shade800,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '${s.progress.completedTasks}/${s.progress.totalTasks} tasks done',
+                          style: TextStyle(color: Colors.grey.shade800),
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: _getPriorityColor(
+                              s.goal.priority,
+                            ).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            'Priority: ${s.goal.priority.toUpperCase()}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: _getPriorityColor(s.goal.priority),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
+              const SizedBox(height: 16),
+
+              // Date range
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Start Date',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              _formatDate(s.goal.startDate),
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.arrow_forward, color: Colors.grey),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              'End Date',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              _formatDate(s.goal.endDate),
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Description
+              if (s.goal.description != null && s.goal.description!.isNotEmpty)
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Description',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(s.goal.description!),
+                      ],
+                    ),
+                  ),
+                ),
+
               const SizedBox(height: 28),
-              const Text(
-                'Milestones',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+
+              // Milestones section
+              Row(
+                children: [
+                  const Text(
+                    'Milestones',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const Spacer(),
+                  Text(
+                    '${s.milestoneGroups.length} milestones',
+                    style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                  ),
+                ],
               ),
               const SizedBox(height: 12),
+
               ...s.milestoneGroups.asMap().entries.map((entry) {
                 final i = entry.key;
                 final g = entry.value;
@@ -109,7 +227,7 @@ class GoalDetailScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       ListTile(
-                        title: Text('${g.label} · Week ${i + 1}'),
+                        title: Text(g.label),
                         trailing: Icon(
                           open ? Icons.expand_less : Icons.expand_more,
                         ),
@@ -151,26 +269,21 @@ class GoalDetailScreen extends StatelessWidget {
                   ),
                 );
               }),
+
               const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Task generation is handled on the server after goal creation.',
-                      ),
-                    ),
-                  );
-                },
-                child: const Text('Generate Tasks'),
-              ),
-              const SizedBox(height: 12),
+
+              // Action buttons
               OutlinedButton(
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Colors.green.shade800,
                   side: BorderSide(color: Colors.green.shade600),
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  // TODO: Implement edit functionality
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Edit feature coming soon')),
+                  );
+                },
                 child: const Text('Edit Goal'),
               ),
               const SizedBox(height: 12),
@@ -211,5 +324,28 @@ class GoalDetailScreen extends StatelessWidget {
         );
       },
     );
+  }
+
+  String _getDurationLabel(DateTime startDate, DateTime endDate) {
+    final duration = endDate.difference(startDate).inDays;
+    final months = (duration / 30).ceil().clamp(1, 36);
+    return '~$months month${months == 1 ? '' : 's'} estimated';
+  }
+
+  Color _getPriorityColor(String priority) {
+    switch (priority.toLowerCase()) {
+      case 'high':
+        return Colors.red;
+      case 'medium':
+        return Colors.orange;
+      case 'low':
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
   }
 }
