@@ -90,7 +90,7 @@ class _ShellDeps extends InheritedWidget {
   final ProgressRepository progressRepo;
 
   static _ShellDeps of(BuildContext context) {
-    final r = context.dependOnInheritedWidgetOfExactType<_ShellDeps>();
+    final r = context.getInheritedWidgetOfExactType<_ShellDeps>();
     assert(r != null, '_ShellDeps not found');
     return r!;
   }
