@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:goal_breakdown_engine_app/core/theme/app_colors.dart';
+import 'package:goal_breakdown_engine_app/core/widgets/atomize_brand_hero.dart';
 import 'package:goal_breakdown_engine_app/core/widgets/theme_toggle_button.dart';
 import 'package:goal_breakdown_engine_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:goal_breakdown_engine_app/features/auth/presentation/bloc/auth_event.dart';
@@ -79,6 +80,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const AtomizeBrandHero(
+                      variant: AtomizeBrandVariant.splashOnGradient,
+                      compact: true,
+                      horizontal: true,
+                    ),
+                    const SizedBox(height: 14),
                     const Text(
                       'Create Your Account',
                       style: TextStyle(

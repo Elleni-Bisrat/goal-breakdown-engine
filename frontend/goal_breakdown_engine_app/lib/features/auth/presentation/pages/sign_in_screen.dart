@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:goal_breakdown_engine_app/core/theme/app_colors.dart';
+import 'package:goal_breakdown_engine_app/core/widgets/atomize_brand_hero.dart';
 import 'package:goal_breakdown_engine_app/core/widgets/theme_toggle_button.dart';
 import 'package:goal_breakdown_engine_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:goal_breakdown_engine_app/features/auth/presentation/bloc/auth_event.dart';
@@ -69,18 +70,16 @@ class _SignInScreenState extends State<SignInScreen> {
                   ),
                 ],
               ),
-              child: const Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Hello, Welcome Back',
-                    style: TextStyle(
-                      color: Color(0xE6FFFFFF),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
+                  const AtomizeBrandHero(
+                    variant: AtomizeBrandVariant.splashOnGradient,
+                    compact: true,
+                    horizontal: true,
+                    tagline: 'Hello, Welcome Back',
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 10),
                   Text(
                     'Sign In!',
                     style: TextStyle(

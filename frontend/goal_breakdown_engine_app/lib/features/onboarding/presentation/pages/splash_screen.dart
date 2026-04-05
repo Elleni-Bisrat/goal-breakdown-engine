@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:goal_breakdown_engine_app/core/theme/app_colors.dart';
+import 'package:goal_breakdown_engine_app/core/widgets/atomize_figma_logo.dart';
 import 'package:goal_breakdown_engine_app/core/widgets/theme_toggle_button.dart';
 
 class SplashScreen extends StatelessWidget {
@@ -11,108 +12,57 @@ class SplashScreen extends StatelessWidget {
     final dark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: dark ? theme.scaffoldBackgroundColor : null,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: dark
-              ? LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    theme.colorScheme.surfaceContainerHigh,
-                    theme.scaffoldBackgroundColor,
-                  ],
-                )
-              : const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    AppColors.splashDeep,
-                    AppColors.splashMid,
-                    AppColors.splashAccent,
-                  ],
-                  stops: [0.0, 0.55, 1.0],
-                ),
-        ),
-        child: SafeArea(
-          child: Stack(
-            children: [
-              Positioned(
-                top: 4,
-                right: 4,
-                child: ThemeToggleIconButton(
-                  iconColor: dark ? theme.colorScheme.primary : Colors.white,
-                ),
+      backgroundColor: dark ? theme.colorScheme.surface : Colors.white,
+      body: SafeArea(
+        child: Stack(
+          children: [
+            Positioned(
+              top: 4,
+              right: 4,
+              child: ThemeToggleIconButton(
+                key: const ValueKey<String>('splash_theme_toggle'),
+                iconColor: dark
+                    ? theme.colorScheme.onSurface
+                    : AppColors.figmaHeadingBlue,
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 28),
+            ),
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Container(
-                      width: 92,
-                      height: 92,
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(
-                          color: theme.colorScheme.primary.withValues(
-                            alpha: 0.45,
-                          ),
-                        ),
-                      ),
-                      child: Icon(
-                        Icons.hexagon_outlined,
-                        color: dark
-                            ? theme.colorScheme.primary
-                            : Colors.white,
-                        size: 50,
-                      ),
+                    AtomizeFigmaSplashBlock(
+                      markSize: dark ? 128 : 132,
+                      titleColor: dark
+                          ? theme.colorScheme.onSurface
+                          : AppColors.figmaHeadingBlue,
+                      taglineColor: dark
+                          ? theme.colorScheme.onSurfaceVariant
+                          : AppColors.figmaBodyGrey,
+                      hexBlue: dark
+                          ? theme.colorScheme.primary
+                          : null,
+                      particleGreen: dark
+                          ? AppColors.figmaParticleGreen.withValues(alpha: 0.95)
+                          : null,
                     ),
-                    const SizedBox(height: 28),
-                    Text(
-                      'ATOMIZE',
-                      style: TextStyle(
-                        color: dark
-                            ? theme.colorScheme.onSurface
-                            : Colors.white,
-                        fontSize: 30,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 3,
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    Text(
-                      'Break big goals into milestones and daily tasks. '
-                      'Plan with dates and priority, then track progress in one place.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: dark
-                            ? theme.colorScheme.onSurfaceVariant
-                            : Colors.white.withValues(alpha: 0.92),
-                        fontSize: 15,
-                        height: 1.45,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 36),
                     SizedBox(
-                      width: 32,
-                      height: 32,
+                      width: 36,
+                      height: 36,
                       child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
+                        strokeWidth: 2.8,
                         color: dark
                             ? theme.colorScheme.primary
-                            : Colors.white,
+                            : AppColors.figmaHeadingBlue,
                       ),
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

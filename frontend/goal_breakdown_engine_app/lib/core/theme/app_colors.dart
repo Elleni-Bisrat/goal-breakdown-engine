@@ -19,4 +19,10 @@ class AppColors {
   static const Color splashDeep = Color(0xFF152B52);
   static const Color splashMid = Color(0xFF2D4A7C);
   static const Color splashAccent = Color(0xFF2EC4B6);
+
+  /// Pre-login Figma reference (headings, primary actions).
+  static const Color figmaHeadingBlue = Color(0xFF3D5A92);
+  static const Color figmaBodyGrey = Color(0xFF6B7A99);
+  static const Color figmaParticleGreen = Color(0xFF1DD882);
+  static const Color figmaIllustrationBg = Color(0xFFEEF2F8);
 }
