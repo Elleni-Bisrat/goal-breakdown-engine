@@ -34,9 +34,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
       listenWhen: (p, c) => c is AuthFailure || c is AuthAuthenticated,
       listener: (context, state) {
         if (state is AuthFailure) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.message)));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+            ),
+          );
         }
         if (state is AuthAuthenticated) {
           Navigator.of(context).popUntil((route) => route.isFirst);
@@ -47,12 +50,26 @@ class _SignUpScreenState extends State<SignUpScreen> {
           children: [
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(24, 48, 24, 28),
-              decoration: const BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.vertical(
+              padding: const EdgeInsets.fromLTRB(24, 48, 24, 32),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.primary,
+                    AppColors.secondary,
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: const BorderRadius.vertical(
                   bottom: Radius.circular(32),
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.22),
+                    blurRadius: 18,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
               ),
               child: const SafeArea(
                 bottom: false,
@@ -62,8 +79,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     'Create Your Account',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 26,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.4,
                     ),
                   ),
                 ),
@@ -73,11 +91,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
               child: Transform.translate(
                 offset: const Offset(0, -20),
                 child: Container(
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.vertical(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(28),
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.06),
+                        blurRadius: 24,
+                        offset: const Offset(0, -4),
+                      ),
+                    ],
                   ),
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(24),

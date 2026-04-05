@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:goal_breakdown_engine_app/app_root.dart';
 import 'package:goal_breakdown_engine_app/core/theme/app_colors.dart';
+import 'package:goal_breakdown_engine_app/core/widgets/app_empty_state.dart';
 import 'package:goal_breakdown_engine_app/features/goals/presentation/bloc/goal_detail_cubit.dart';
 import 'package:goal_breakdown_engine_app/features/goals/presentation/bloc/goals_bloc.dart';
 import 'package:goal_breakdown_engine_app/features/goals/presentation/bloc/goals_event.dart';
@@ -23,42 +24,80 @@ class MyGoalsScreen extends StatelessWidget {
           slivers: [
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 12, 12, 8),
-                child: Row(
+                padding: const EdgeInsets.fromLTRB(12, 8, 8, 4),
+                child: Column(
                   children: [
-                    IconButton(
-                      onPressed: () {},
-                      icon: const Icon(Icons.settings_outlined),
-                    ),
-                    const Expanded(
-                      child: Text(
-                        'My Goals',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    TextButton.icon(
-                      onPressed: () async {
-                        final data = await showCreateGoalSheet(context);
-                        if (data == null || !context.mounted) return;
-
-                        debugPrint('Creating goal with data: $data');
-
-                        context.read<GoalsBloc>().add(
-                          GoalCreateRequested(
-                            title: data['title'] as String,
-                            description: data['description'] as String,
-                            startDate: data['startDate'] as DateTime,
-                            endDate: data['endDate'] as DateTime,
-                            priority: data['priority'] as String,
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () {},
+                          tooltip: 'Settings',
+                          style: IconButton.styleFrom(
+                            foregroundColor:
+                                Theme.of(context).colorScheme.onSurface,
                           ),
-                        );
-                      },
-                      icon: const Icon(Icons.add, color: AppColors.primary),
-                      label: const Text('Create'),
+                          icon: const Icon(Icons.tune_rounded),
+                        ),
+                        Expanded(
+                          child: Column(
+                            children: [
+                              Text(
+                                'My Goals',
+                                textAlign: TextAlign.center,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineSmall
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: -0.5,
+                                      color: AppColors.primary,
+                                    ),
+                              ),
+                              const SizedBox(height: 8),
+                              Center(
+                                child: Container(
+                                  width: 48,
+                                  height: 4,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(999),
+                                    gradient: const LinearGradient(
+                                      colors: [
+                                        AppColors.primary,
+                                        AppColors.secondary,
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        TextButton.icon(
+                          onPressed: () async {
+                            final data = await showCreateGoalSheet(context);
+                            if (data == null || !context.mounted) return;
+
+                            debugPrint('Creating goal with data: $data');
+
+                            context.read<GoalsBloc>().add(
+                              GoalCreateRequested(
+                                title: data['title'] as String,
+                                description: data['description'] as String,
+                                startDate: data['startDate'] as DateTime,
+                                endDate: data['endDate'] as DateTime,
+                                priority: data['priority'] as String,
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.add_rounded),
+                          label: const Text('Create'),
+                          style: TextButton.styleFrom(
+                            foregroundColor: AppColors.primary,
+                            textStyle:
+                                const TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -67,11 +106,12 @@ class MyGoalsScreen extends StatelessWidget {
             BlocConsumer<GoalsBloc, GoalsState>(
               listener: (context, state) {
                 if (state is GoalsFailure) {
+                  final cs = Theme.of(context).colorScheme;
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(state.message),
-                      backgroundColor: Colors.red,
-                      duration: const Duration(seconds: 3),
+                      backgroundColor: cs.error,
+                      duration: const Duration(seconds: 4),
                     ),
                   );
                 }
@@ -83,53 +123,47 @@ class MyGoalsScreen extends StatelessWidget {
               builder: (context, state) {
                 // Loading state
                 if (state is GoalsLoading || state is GoalsInitial) {
-                  return const SliverFillRemaining(
-                    child: Center(child: CircularProgressIndicator()),
+                  return SliverFillRemaining(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(
+                            width: 36,
+                            height: 36,
+                            child: CircularProgressIndicator(strokeWidth: 3),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Loading goals…',
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
                   );
                 }
 
                 // Error state
                 if (state is GoalsFailure) {
                   return SliverFillRemaining(
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.error_outline,
-                            size: 64,
-                            color: Colors.grey.shade400,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Failed to load goals',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey.shade600,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            state.message,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey.shade500,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 24),
-                          ElevatedButton(
-                            onPressed: () {
-                              context.read<GoalsBloc>().add(
-                                const GoalsLoadRequested(),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                            ),
-                            child: const Text('Retry'),
-                          ),
-                        ],
+                    child: AppEmptyState(
+                      icon: Icons.error_outline_rounded,
+                      title: 'Failed to load goals',
+                      subtitle: state.message,
+                      action: FilledButton.icon(
+                        onPressed: () {
+                          context.read<GoalsBloc>().add(
+                            const GoalsLoadRequested(),
+                          );
+                        },
+                        icon: const Icon(Icons.refresh_rounded, size: 20),
+                        label: const Text('Retry'),
                       ),
                     ),
                   );
@@ -138,36 +172,12 @@ class MyGoalsScreen extends StatelessWidget {
                 // Loaded state with goals
                 if (state is GoalsLoaded) {
                   if (state.goals.isEmpty) {
-                    return SliverFillRemaining(
-                      child: Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(24),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.emoji_events_outlined,
-                                size: 64,
-                                color: Colors.grey.shade400,
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'No goals yet',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey.shade700,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Tap Create to add a goal with timeline and priority',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(color: Colors.grey.shade600),
-                              ),
-                            ],
-                          ),
-                        ),
+                    return const SliverFillRemaining(
+                      child: AppEmptyState(
+                        icon: Icons.emoji_events_outlined,
+                        title: 'No goals yet',
+                        subtitle:
+                            'Tap Create to add a goal with timeline and priority.',
                       ),
                     );
                   }
@@ -181,13 +191,20 @@ class MyGoalsScreen extends StatelessWidget {
                       delegate: SliverChildBuilderDelegate((context, index) {
                         final goal = state.goals[index];
                         return Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
+                          padding: const EdgeInsets.only(bottom: 14),
                           child: Material(
                             color: AppColors.goalCard,
-                            borderRadius: BorderRadius.circular(24),
-                            elevation: 2,
+                            borderRadius: BorderRadius.circular(20),
+                            elevation: 0,
+                            shadowColor: Colors.transparent,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              side: BorderSide(
+                                color: AppColors.primary.withValues(alpha: 0.08),
+                              ),
+                            ),
                             child: InkWell(
-                              borderRadius: BorderRadius.circular(24),
+                              borderRadius: BorderRadius.circular(20),
                               onTap: () {
                                 Navigator.of(context).push(
                                   MaterialPageRoute<void>(
@@ -204,7 +221,7 @@ class MyGoalsScreen extends StatelessWidget {
                                 );
                               },
                               child: Padding(
-                                padding: const EdgeInsets.all(20),
+                                padding: const EdgeInsets.fromLTRB(18, 18, 18, 14),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -230,7 +247,7 @@ class MyGoalsScreen extends StatelessWidget {
                                           decoration: BoxDecoration(
                                             color: _getPriorityColor(
                                               goal.priority,
-                                            ).withOpacity(0.1),
+                                            ).withValues(alpha: 0.1),
                                             borderRadius: BorderRadius.circular(
                                               12,
                                             ),
@@ -296,43 +313,23 @@ class MyGoalsScreen extends StatelessWidget {
                                       ],
                                     ),
                                     const SizedBox(height: 12),
-                                    // Progress indicator
                                     if (goal.totalTasks > 0)
-                                      Column(
+                                      Row(
                                         children: [
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Text(
-                                                'Progress',
-                                                style: TextStyle(
-                                                  fontSize: 12,
-                                                  color: Colors.grey.shade600,
-                                                ),
-                                              ),
-                                              Text(
-                                                '${goal.totalTasks} tasks',
-                                                style: TextStyle(
-                                                  fontSize: 12,
-                                                  color: Colors.grey.shade600,
-                                                ),
-                                              ),
-                                            ],
+                                          Icon(
+                                            Icons.checklist_rounded,
+                                            size: 18,
+                                            color: Colors.grey.shade600,
                                           ),
-                                          const SizedBox(height: 4),
-                                          LinearProgressIndicator(
-                                            value: goal.totalTasks > 0
-                                                ? (goal.totalTasks /
-                                                      (goal.totalTasks +
-                                                          (goal.totalTasks -
-                                                              goal.totalTasks)))
-                                                : 0,
-                                            backgroundColor:
-                                                Colors.grey.shade200,
-                                            color: AppColors.primary,
-                                            borderRadius: BorderRadius.circular(
-                                              4,
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Text(
+                                              '${goal.totalTasks} tasks in this goal',
+                                              style: TextStyle(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w600,
+                                                color: Colors.grey.shade700,
+                                              ),
                                             ),
                                           ),
                                         ],
@@ -363,7 +360,8 @@ class MyGoalsScreen extends StatelessWidget {
                                         style: OutlinedButton.styleFrom(
                                           foregroundColor: AppColors.primary,
                                           side: BorderSide(
-                                            color: AppColors.primary,
+                                            color: AppColors.primary
+                                                .withValues(alpha: 0.45),
                                           ),
                                         ),
                                         child: const Text('View Details'),

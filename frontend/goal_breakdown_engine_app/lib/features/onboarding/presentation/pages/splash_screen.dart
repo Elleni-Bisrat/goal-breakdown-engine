@@ -31,7 +31,17 @@ class SplashScreen extends StatelessWidget {
                 letterSpacing: 2,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
+            Text(
+              'Goal breakdown, simplified',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.88),
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.3,
+              ),
+            ),
+            const SizedBox(height: 20),
             const SizedBox(
               width: 28,
               height: 28,

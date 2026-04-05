@@ -104,6 +104,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           decoration: BoxDecoration(
                             color: AppColors.goalCard,
                             borderRadius: BorderRadius.circular(24),
+                            border: Border.all(
+                              color: AppColors.primary.withValues(alpha: 0.08),
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.primary.withValues(alpha: 0.12),
+                                blurRadius: 20,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
                           ),
                           child: Center(
                             child: Icon(

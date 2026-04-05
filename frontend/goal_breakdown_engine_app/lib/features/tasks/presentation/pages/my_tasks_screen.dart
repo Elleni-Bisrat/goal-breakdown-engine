@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:goal_breakdown_engine_app/core/theme/app_colors.dart';
+import 'package:goal_breakdown_engine_app/core/widgets/app_empty_state.dart';
 import 'package:goal_breakdown_engine_app/features/tasks/presentation/bloc/tasks_hierarchy_cubit.dart';
 
 class MyTasksScreen extends StatelessWidget {
@@ -8,29 +9,51 @@ class MyTasksScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return SafeArea(
       child: RefreshIndicator(
         onRefresh: () async => context.read<TasksHierarchyCubit>().load(),
+        color: AppColors.primary,
         child: BlocBuilder<TasksHierarchyCubit, TasksHierarchyState>(
           builder: (context, state) {
             if (state is TasksHierarchyLoading ||
                 state is TasksHierarchyInitial) {
-              return const Center(child: CircularProgressIndicator());
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const SizedBox(
+                      width: 36,
+                      height: 36,
+                      child: CircularProgressIndicator(strokeWidth: 3),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Loading tasks…',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              );
             }
             if (state is TasksHierarchyError) {
               return ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      children: [
-                        Text(state.message),
-                        FilledButton(
-                          onPressed: () =>
-                              context.read<TasksHierarchyCubit>().load(),
-                          child: const Text('Retry'),
-                        ),
-                      ],
+                  SizedBox(
+                    height: MediaQuery.sizeOf(context).height * 0.55,
+                    child: AppEmptyState(
+                      icon: Icons.cloud_off_outlined,
+                      title: 'Couldn’t load tasks',
+                      subtitle: state.message,
+                      action: FilledButton.icon(
+                        onPressed: () =>
+                            context.read<TasksHierarchyCubit>().load(),
+                        icon: const Icon(Icons.refresh_rounded, size: 20),
+                        label: const Text('Retry'),
+                      ),
                     ),
                   ),
                 ],
@@ -39,32 +62,44 @@ class MyTasksScreen extends StatelessWidget {
             final s = state as TasksHierarchyReady;
             if (s.bundles.isEmpty) {
               return ListView(
-                children: const [
-                  SizedBox(height: 120),
-                  Center(child: Text('No goals or tasks yet.')),
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [
+                  SizedBox(
+                    height: MediaQuery.sizeOf(context).height * 0.65,
+                    child: const AppEmptyState(
+                      icon: Icons.inbox_outlined,
+                      title: 'No goals or tasks yet',
+                      subtitle:
+                          'Create a goal and open it here to see milestones and tasks.',
+                    ),
+                  ),
                 ],
               );
             }
             return ListView(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+              padding: const EdgeInsets.fromLTRB(18, 12, 18, 28),
               children: [
                 Row(
                   children: [
-                    const CircleAvatar(
+                    CircleAvatar(
                       radius: 22,
                       backgroundColor: AppColors.goalCard,
-                      child: Icon(Icons.person, color: AppColors.primary),
+                      child: Icon(
+                        Icons.person_rounded,
+                        color: theme.colorScheme.primary,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Text(
                       'My Tasks',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.3,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: 18),
                 ...s.bundles.map((bundle) {
                   final expanded = s.expandedGoals.contains(bundle.goal.id);
                   return Padding(
@@ -75,6 +110,8 @@ class MyTasksScreen extends StatelessWidget {
                         Material(
                           color: AppColors.primary,
                           borderRadius: BorderRadius.circular(16),
+                          elevation: 0,
+                          shadowColor: AppColors.primary.withValues(alpha: 0.35),
                           child: InkWell(
                             borderRadius: BorderRadius.circular(16),
                             onTap: () => context
@@ -82,8 +119,8 @@ class MyTasksScreen extends StatelessWidget {
                                 .toggleGoal(bundle.goal.id),
                             child: Padding(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 14,
+                                horizontal: 18,
+                                vertical: 16,
                               ),
                               child: Row(
                                 children: [
@@ -93,13 +130,15 @@ class MyTasksScreen extends StatelessWidget {
                                       style: const TextStyle(
                                         color: Colors.white,
                                         fontWeight: FontWeight.w700,
+                                        fontSize: 16,
+                                        letterSpacing: -0.2,
                                       ),
                                     ),
                                   ),
                                   Icon(
                                     expanded
-                                        ? Icons.expand_less
-                                        : Icons.expand_more,
+                                        ? Icons.expand_less_rounded
+                                        : Icons.expand_more_rounded,
                                     color: Colors.white,
                                   ),
                                 ],
@@ -107,9 +146,15 @@ class MyTasksScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-                        if (expanded)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8, left: 4),
+                        AnimatedCrossFade(
+                          duration: const Duration(milliseconds: 220),
+                          crossFadeState: expanded
+                              ? CrossFadeState.showSecond
+                              : CrossFadeState.showFirst,
+                          sizeCurve: Curves.easeOutCubic,
+                          firstChild: const SizedBox(width: double.infinity),
+                          secondChild: Padding(
+                            padding: const EdgeInsets.only(top: 10, left: 2),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
@@ -126,46 +171,60 @@ class MyTasksScreen extends StatelessWidget {
                                         ),
                                         child: Text(
                                           'Milestone ${mIndex + 1}',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.w700,
-                                            color: Colors.grey.shade800,
-                                          ),
+                                          style: theme.textTheme.titleSmall
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.w800,
+                                                color: theme
+                                                    .colorScheme.onSurface,
+                                              ),
                                         ),
                                       ),
                                       ...tasks.map(
-                                        (t) => Card(
-                                          margin: const EdgeInsets.only(
+                                        (t) => Padding(
+                                          padding: const EdgeInsets.only(
                                             bottom: 8,
                                           ),
-                                          child: ListTile(
-                                            leading: Checkbox(
-                                              value: t.isCompleted,
-                                              onChanged: (_) => context
-                                                  .read<TasksHierarchyCubit>()
-                                                  .toggleTaskComplete(t),
-                                            ),
-                                            title: Text(
-                                              t.title,
-                                              style: TextStyle(
-                                                decoration: t.isCompleted
-                                                    ? TextDecoration.lineThrough
-                                                    : null,
+                                          child: Card(
+                                            child: ListTile(
+                                              contentPadding:
+                                                  const EdgeInsets.symmetric(
+                                                horizontal: 12,
+                                                vertical: 4,
                                               ),
-                                            ),
-                                            trailing: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                IconButton(
-                                                  icon: const Icon(
-                                                    Icons.delete_outline,
-                                                  ),
-                                                  onPressed: () => context
-                                                      .read<
-                                                        TasksHierarchyCubit
-                                                      >()
-                                                      .deleteTask(t.id),
+                                              leading: Checkbox.adaptive(
+                                                value: t.isCompleted,
+                                                activeColor: AppColors.primary,
+                                                onChanged: (_) => context
+                                                    .read<
+                                                        TasksHierarchyCubit>()
+                                                    .toggleTaskComplete(t),
+                                              ),
+                                              title: Text(
+                                                t.title,
+                                                style: TextStyle(
+                                                  decoration: t.isCompleted
+                                                      ? TextDecoration
+                                                          .lineThrough
+                                                      : null,
+                                                  color: t.isCompleted
+                                                      ? theme.colorScheme
+                                                          .onSurfaceVariant
+                                                      : null,
                                                 ),
-                                              ],
+                                              ),
+                                              trailing: IconButton(
+                                                tooltip: 'Delete task',
+                                                icon: Icon(
+                                                  Icons.delete_outline_rounded,
+                                                  color: theme
+                                                      .colorScheme.error
+                                                      .withValues(alpha: 0.85),
+                                                ),
+                                                onPressed: () => context
+                                                    .read<
+                                                        TasksHierarchyCubit>()
+                                                    .deleteTask(t.id),
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -176,6 +235,7 @@ class MyTasksScreen extends StatelessWidget {
                               ],
                             ),
                           ),
+                        ),
                       ],
                     ),
                   );
