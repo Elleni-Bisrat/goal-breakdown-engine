@@ -40,13 +40,12 @@ class GoalsBloc extends Bloc<GoalsEvent, GoalsState> {
         : <GoalEntity>[];
     emit(const GoalsLoading());
     try {
-      final duration = _durationForPriority(event.priorityLabel);
-      final description =
-          'Priority: ${event.priorityLabel}. ${event.title.trim()}';
       await _goalRepository.createGoal(
         title: event.title.trim(),
-        description: description,
-        duration: duration,
+        description: event.description.trim(),
+        startDate: event.startDate,
+        endDate: event.endDate,
+        priority: event.priority,
       );
       final goals = await _goalRepository.fetchGoals();
       emit(GoalsLoaded(goals));
@@ -73,17 +72,11 @@ class GoalsBloc extends Bloc<GoalsEvent, GoalsState> {
     }
   }
 
-  static int _durationForPriority(String label) {
-    final l = label.toLowerCase();
-    if (l.contains('high')) return 90;
-    if (l.contains('low')) return 30;
-    return 60;
-  }
-
   static String _dioMsg(DioException e) {
     final data = e.response?.data;
-    if (data is Map && data['message'] != null)
+    if (data is Map && data['message'] != null) {
       return data['message'].toString();
+    }
     return e.message ?? 'Request failed';
   }
 }

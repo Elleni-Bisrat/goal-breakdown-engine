@@ -12,14 +12,22 @@ final class GoalsLoadRequested extends GoalsEvent {
 }
 
 final class GoalCreateRequested extends GoalsEvent {
-  const GoalCreateRequested({required this.title, required this.priorityLabel});
+  const GoalCreateRequested({
+    required this.title,
+    required this.description,
+    required this.startDate,
+    required this.endDate,
+    required this.priority,
+  });
 
   final String title;
-  /// e.g. High, Medium, Low — mapped to duration on submit.
-  final String priorityLabel;
+  final String description;
+  final DateTime startDate;
+  final DateTime endDate;
+  final String priority; // 'low', 'medium', 'high'
 
   @override
-  List<Object?> get props => [title, priorityLabel];
+  List<Object?> get props => [title, description, startDate, endDate, priority];
 }
 
 final class GoalDeleteRequested extends GoalsEvent {

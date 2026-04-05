@@ -4,7 +4,7 @@ class ApiConfig {
 
   static const String baseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://127.0.0.1:5000',
+    defaultValue: 'https://goal-breakdown-engine.onrender.com',
   );
 
   static const String apiPrefix = '/api';
