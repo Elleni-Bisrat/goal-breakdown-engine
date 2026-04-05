@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:goal_breakdown_engine_app/core/theme/app_colors.dart';
+import 'package:goal_breakdown_engine_app/core/widgets/theme_toggle_button.dart';
 import 'package:goal_breakdown_engine_app/features/onboarding/presentation/bloc/onboarding_cubit.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -16,35 +17,31 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   static const _slides = [
     _Slide(
-      title: 'Set focused goals',
+      title: 'Dream Big Start Small',
       body:
-          'Name what you want to achieve, add optional context, and choose start '
-          'and end dates plus priority. ATOMIZE keeps the goal clear so you are not '
-          'overwhelmed by a vague ambition.',
+          'Set a clear goal with dates and priority. ATOMIZE keeps the target visible '
+          'so you can focus on the next step instead of the whole mountain.',
       icon: Icons.flag_outlined,
     ),
     _Slide(
-      title: 'Break work into steps',
+      title: 'Automatically Atomized',
       body:
-          'Goals become milestones and concrete tasks. You always see the next '
-          'action instead of guessing what to do today. The app is built for steady '
-          'progress, not one-off to-do dumps.',
+          'Goals break into milestones and tasks automatically. You always know what '
+          'to do today while the app keeps structure aligned with your timeline.',
       icon: Icons.auto_awesome,
     ),
     _Slide(
-      title: 'Track and finish',
+      title: 'One Day at a Time',
       body:
-          'Mark tasks done, watch overall progress, and open any goal for details. '
-          'Use the Home overview for a snapshot and the Tasks tab to work through '
-          'your hierarchy by goal.',
+          'Check off tasks, watch progress on Home, and drill into details when you '
+          'need context. Small wins add up to finished goals.',
       icon: Icons.trending_up,
     ),
     _Slide(
-      title: 'Start in minutes',
+      title: 'Visualize Your Growth',
       body:
-          'Create an account or sign in, add your first goal with timeline and '
-          'priority, then refine as you go. Everything stays synced with your '
-          'backend so lists and progress stay up to date.',
+          'Sign in, create your first goal, and see stats, lists, and completion '
+          'rings update as you work. Your data stays in sync with the server.',
       icon: Icons.rocket_launch_outlined,
     ),
   ];
@@ -57,38 +54,57 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
     final isLast = _page == _slides.length - 1;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFEEF2FF),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              const Color(0xFFE8EEFF),
-              AppColors.background,
-            ],
+            colors: theme.brightness == Brightness.dark
+                ? [
+                    cs.surfaceContainerHigh,
+                    theme.scaffoldBackgroundColor,
+                  ]
+                : [
+                    const Color(0xFFE8EEFF),
+                    AppColors.background,
+                  ],
           ),
         ),
         child: SafeArea(
           child: Column(
             children: [
-              if (!isLast)
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () =>
-                        context.read<OnboardingCubit>().completeOnboarding(),
-                    child: const Text(
-                      'Skip',
-                      style: TextStyle(
-                        color: AppColors.splashMid,
-                        fontWeight: FontWeight.w600,
-                      ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Row(
+                  children: [
+                    ThemeToggleIconButton(
+                      iconColor: theme.brightness == Brightness.dark
+                          ? cs.onSurface
+                          : null,
                     ),
-                  ),
+                    const Spacer(),
+                    if (!isLast)
+                      TextButton(
+                        onPressed: () => context
+                            .read<OnboardingCubit>()
+                            .completeOnboarding(),
+                        child: Text(
+                          'Skip',
+                          style: TextStyle(
+                            color: cs.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
+              ),
               Expanded(
                 child: PageView.builder(
                   controller: _pageController,
@@ -98,65 +114,85 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     final s = _slides[i];
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 8),
-                          Icon(
-                            Icons.hexagon_outlined,
-                            size: 52,
-                            color: AppColors.splashMid,
-                          ),
-                          const SizedBox(height: 20),
-                          Text(
-                            s.title,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF1A2744),
-                            ),
-                          ),
-                          const SizedBox(height: 14),
-                          Text(
-                            s.body,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 15,
-                              color: Colors.grey.shade800,
-                              height: 1.45,
-                            ),
-                          ),
-                          const Spacer(),
-                          Container(
-                            height: 168,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(24),
-                              border: Border.all(
-                                color: AppColors.splashAccent.withValues(
-                                  alpha: 0.35,
-                                ),
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          return SingleChildScrollView(
+                            physics: const BouncingScrollPhysics(),
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                minHeight: constraints.maxHeight,
                               ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.splashMid.withValues(
-                                    alpha: 0.12,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
+                                    children: [
+                                      const SizedBox(height: 8),
+                                      Icon(
+                                        Icons.hexagon_outlined,
+                                        size: 48,
+                                        color: cs.primary,
+                                      ),
+                                      const SizedBox(height: 16),
+                                      Text(
+                                        s.title,
+                                        textAlign: TextAlign.center,
+                                        style: theme.textTheme.titleLarge
+                                            ?.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 12),
+                                      Text(
+                                        s.body,
+                                        textAlign: TextAlign.center,
+                                        style: theme.textTheme.bodyMedium
+                                            ?.copyWith(
+                                          height: 1.45,
+                                          color: cs.onSurfaceVariant,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  blurRadius: 22,
-                                  offset: const Offset(0, 10),
-                                ),
-                              ],
-                            ),
-                            child: Center(
-                              child: Icon(
-                                s.icon,
-                                size: 72,
-                                color: AppColors.splashMid,
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 24),
+                                    child: Container(
+                                      height: 168,
+                                      width: double.infinity,
+                                      decoration: BoxDecoration(
+                                        color: theme.brightness ==
+                                                Brightness.dark
+                                            ? cs.surfaceContainerHighest
+                                            : Colors.white,
+                                        borderRadius: BorderRadius.circular(24),
+                                        border: Border.all(
+                                          color: cs.outlineVariant
+                                              .withValues(alpha: 0.5),
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: cs.primary
+                                                .withValues(alpha: 0.08),
+                                            blurRadius: 18,
+                                            offset: const Offset(0, 8),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Center(
+                                        child: Icon(
+                                          s.icon,
+                                          size: 72,
+                                          color: cs.primary,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+                                ],
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 20),
-                        ],
+                          );
+                        },
                       ),
                     );
                   },
@@ -171,9 +207,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     width: i == _page ? 22 : 8,
                     height: 8,
                     decoration: BoxDecoration(
-                      color: i == _page
-                          ? AppColors.splashMid
-                          : Colors.grey.shade300,
+                      color: i == _page ? cs.primary : cs.outlineVariant,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -214,7 +248,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 }
 
 class _Slide {
-  const _Slide({required this.title, required this.body, required this.icon});
+  const _Slide({
+    required this.title,
+    required this.body,
+    required this.icon,
+  });
 
   final String title;
   final String body;

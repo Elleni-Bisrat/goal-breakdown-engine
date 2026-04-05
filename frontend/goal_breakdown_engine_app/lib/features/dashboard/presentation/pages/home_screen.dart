@@ -1,15 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:goal_breakdown_engine_app/app_root.dart';
+import 'package:goal_breakdown_engine_app/core/settings/settings_sheet.dart';
+import 'package:goal_breakdown_engine_app/core/settings/user_display.dart';
 import 'package:goal_breakdown_engine_app/core/theme/app_colors.dart';
 import 'package:goal_breakdown_engine_app/core/widgets/app_empty_state.dart';
 import 'package:goal_breakdown_engine_app/core/widgets/app_surface_card.dart';
+import 'package:goal_breakdown_engine_app/core/widgets/theme_toggle_button.dart';
+import 'package:goal_breakdown_engine_app/core/settings/app_settings_cubit.dart';
+import 'package:goal_breakdown_engine_app/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:goal_breakdown_engine_app/features/auth/presentation/bloc/auth_state.dart';
 import 'package:goal_breakdown_engine_app/features/dashboard/presentation/bloc/dashboard_cubit.dart';
 import 'package:goal_breakdown_engine_app/features/goals/presentation/bloc/goal_detail_cubit.dart';
 import 'package:goal_breakdown_engine_app/features/goals/presentation/pages/goal_detail_screen.dart';
+import 'package:goal_breakdown_engine_app/features/tasks/domain/entities/task_entity.dart';
+import 'package:goal_breakdown_engine_app/features/tasks/presentation/pages/task_detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
+
+  void _openTaskDetail(BuildContext context, TaskEntity task) {
+    Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => TaskDetailScreen(task: task),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,48 +82,57 @@ class HomeScreen extends StatelessWidget {
             return ListView(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
               children: [
-                Row(
-                  children: [
-                    CircleAvatar(
-                      radius: 26,
-                      backgroundColor: AppColors.goalCard,
-                      child: Icon(
-                        Icons.person_rounded,
-                        color: theme.colorScheme.primary,
-                        size: 28,
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Hello, Judith Smith',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.2,
+                BlocBuilder<AppSettingsCubit, AppSettingsState>(
+                  builder: (context, settings) {
+                    return BlocBuilder<AuthBloc, AuthState>(
+                      builder: (context, auth) {
+                        final name = UserDisplay.name(settings, auth);
+                        return Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 26,
+                              backgroundColor: AppColors.goalCard,
+                              child: Text(
+                                settings.avatarEmoji,
+                                style: const TextStyle(fontSize: 26),
+                              ),
                             ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Let’s crush your goals today',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurfaceVariant,
-                              fontSize: 13,
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Hi, $name',
+                                    style: theme.textTheme.titleMedium
+                                        ?.copyWith(
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: -0.2,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Let’s crush your goals today',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme
+                                          .colorScheme.onSurfaceVariant,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    IconButton.filledTonal(
-                      onPressed: () {},
-                      icon: const Icon(Icons.notifications_outlined),
-                      style: IconButton.styleFrom(
-                        foregroundColor: AppColors.primary,
-                      ),
-                    ),
-                  ],
+                            const ThemeToggleIconButton(),
+                            IconButton(
+                              tooltip: 'Settings',
+                              onPressed: () => showAppSettingsSheet(context),
+                              icon: const Icon(Icons.settings_outlined),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
                 ),
                 const SizedBox(height: 24),
                 Text(
@@ -131,22 +156,22 @@ class HomeScreen extends StatelessWidget {
                         _StatCard(
                           color: AppColors.purpleStat,
                           value: '${s.activeGoalsCount}',
-                          label: 'Active goals',
+                          label: 'Goals',
                         ),
                         _StatCard(
                           color: AppColors.orangeStat,
                           value: '${s.tasksInProgress}',
-                          label: 'In progress',
+                          label: 'Tasks',
                         ),
                         _StatCard(
                           color: AppColors.greenStat,
                           value: '${s.completedToday}',
-                          label: 'Completed today',
+                          label: 'Completed',
                         ),
                         _StatCard(
                           color: AppColors.blueStat,
                           value: '${s.overallPercent}%',
-                          label: 'Overall',
+                          label: 'Progress',
                         ),
                       ],
                     );
@@ -246,46 +271,62 @@ class HomeScreen extends StatelessWidget {
                     (t) => Padding(
                       padding: const EdgeInsets.only(bottom: 10),
                       child: AppSurfaceCard(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 4,
-                          vertical: 4,
-                        ),
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          title: Text(
-                            t.title,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.bodyLarge?.copyWith(
-                              fontWeight: FontWeight.w500,
+                        onTap: () => _openTaskDetail(context, t),
+                        padding: const EdgeInsets.fromLTRB(12, 10, 12, 8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    t.title,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: theme.textTheme.bodyLarge?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: t.isCompleted
+                                        ? AppColors.greenStat
+                                            .withValues(alpha: 0.15)
+                                        : AppColors.orangeStat
+                                            .withValues(alpha: 0.18),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    t.isCompleted
+                                        ? 'COMPLETED'
+                                        : 'IN PROGRESS',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: 0.4,
+                                      color: t.isCompleted
+                                          ? const Color(0xFF2D6A45)
+                                          : const Color(0xFFB85C1A),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                          trailing: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: t.isCompleted
-                                  ? AppColors.greenStat.withValues(alpha: 0.15)
-                                  : AppColors.orangeStat.withValues(alpha: 0.18),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              t.isCompleted ? 'Done' : 'Pending',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.3,
-                                color: t.isCompleted
-                                    ? const Color(0xFF2D6A45)
-                                    : const Color(0xFFB85C1A),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: () => _openTaskDetail(context, t),
+                                child: const Text('View Details'),
                               ),
                             ),
-                          ),
+                          ],
                         ),
                       ),
                     ),

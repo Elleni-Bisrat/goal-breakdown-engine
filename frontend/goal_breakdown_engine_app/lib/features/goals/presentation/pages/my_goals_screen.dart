@@ -25,7 +25,7 @@ class MyGoalsScreen extends StatelessWidget {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => BlocProvider(
-          create: (context) => GoalDetailCubit(
+          create: (_) => GoalDetailCubit(
             goalRepository: context.goalRepository,
             taskRepository: context.taskRepository,
             progressRepository: context.progressRepository,

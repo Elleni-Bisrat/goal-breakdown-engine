@@ -57,8 +57,8 @@ class _MainShellState extends State<MainShell> {
           index: _index,
           children: const [
             HomeScreen(),
-            MyTasksScreen(),
             MyGoalsScreen(),
+            MyTasksScreen(),
             ProfileScreen(),
           ],
         ),
@@ -68,7 +68,7 @@ class _MainShellState extends State<MainShell> {
             setState(() => _index = i);
             // Goals tab: ensure list loads when opening the tab (IndexedStack
             // may have kept the subtree inactive; also covers missed initial load).
-            if (i == 2) {
+            if (i == 1) {
               context.read<GoalsBloc>().add(const GoalsLoadRequested());
             }
           },
@@ -79,14 +79,14 @@ class _MainShellState extends State<MainShell> {
               label: 'Home',
             ),
             NavigationDestination(
-              icon: Icon(Icons.checklist_outlined),
-              selectedIcon: Icon(Icons.checklist),
-              label: 'Tasks',
-            ),
-            NavigationDestination(
               icon: Icon(Icons.flag_outlined),
               selectedIcon: Icon(Icons.flag),
               label: 'Goals',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.checklist_outlined),
+              selectedIcon: Icon(Icons.checklist),
+              label: 'Tasks',
             ),
             NavigationDestination(
               icon: Icon(Icons.person_outline),

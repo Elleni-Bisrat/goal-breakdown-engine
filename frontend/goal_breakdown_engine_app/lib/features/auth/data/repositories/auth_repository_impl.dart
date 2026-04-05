@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:goal_breakdown_engine_app/features/auth/domain/entities/auth_session.dart';
 import 'package:goal_breakdown_engine_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:goal_breakdown_engine_app/features/onboarding/data/local/token_memory.dart';
 import 'package:goal_breakdown_engine_app/features/onboarding/data/local/token_storage_prefs.dart';
@@ -16,8 +17,36 @@ class AuthRepositoryImpl implements AuthRepository {
   final TokenStoragePrefs _prefs;
   final TokenMemory _memory;
 
+  static AuthSession _sessionFromData(Map<String, dynamic> data, String token) {
+    String? pickName() {
+      final u = data['user'];
+      if (u is Map) {
+        final n = u['name'] ?? u['displayName'] ?? u['fullName'];
+        if (n != null) return n.toString();
+      }
+      final n = data['name'] ?? data['displayName'] ?? data['fullName'];
+      return n?.toString();
+    }
+
+    String? pickEmail() {
+      final u = data['user'];
+      if (u is Map) {
+        final e = u['email'];
+        if (e != null) return e.toString();
+      }
+      final e = data['email'];
+      return e?.toString();
+    }
+
+    return AuthSession(
+      token: token,
+      displayName: pickName(),
+      email: pickEmail(),
+    );
+  }
+
   @override
-  Future<String> login({
+  Future<AuthSession> login({
     required String email,
     required String password,
   }) async {
@@ -30,12 +59,13 @@ class AuthRepositoryImpl implements AuthRepository {
     if (token == null || token.isEmpty) {
       throw StateError(data['message']?.toString() ?? 'Login failed');
     }
-    await persistToken(token);
-    return token;
+    final session = _sessionFromData(data, token);
+    await persistToken(session.token);
+    return session;
   }
 
   @override
-  Future<String> signUp({
+  Future<AuthSession> signUp({
     required String name,
     required String email,
     required String password,
@@ -49,8 +79,14 @@ class AuthRepositoryImpl implements AuthRepository {
     if (token == null || token.isEmpty) {
       throw StateError(data['message']?.toString() ?? 'Sign up failed');
     }
-    await persistToken(token);
-    return token;
+    var session = _sessionFromData(data, token);
+    session = AuthSession(
+      token: session.token,
+      displayName: session.displayName ?? name,
+      email: session.email ?? email,
+    );
+    await persistToken(session.token);
+    return session;
   }
 
   @override
