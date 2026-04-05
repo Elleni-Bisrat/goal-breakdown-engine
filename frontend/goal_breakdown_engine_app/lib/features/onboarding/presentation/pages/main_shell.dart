@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:goal_breakdown_engine_app/app_root.dart';
-import 'package:goal_breakdown_engine_app/core/theme/app_colors.dart';
 import 'package:goal_breakdown_engine_app/features/dashboard/presentation/bloc/dashboard_cubit.dart';
 import 'package:goal_breakdown_engine_app/features/dashboard/presentation/pages/home_screen.dart';
 import 'package:goal_breakdown_engine_app/features/goals/presentation/bloc/goals_bloc.dart';
@@ -65,8 +64,14 @@ class _MainShellState extends State<MainShell> {
         ),
         bottomNavigationBar: NavigationBar(
           selectedIndex: _index,
-          onDestinationSelected: (i) => setState(() => _index = i),
-          indicatorColor: AppColors.goalCard,
+          onDestinationSelected: (i) {
+            setState(() => _index = i);
+            // Goals tab: ensure list loads when opening the tab (IndexedStack
+            // may have kept the subtree inactive; also covers missed initial load).
+            if (i == 2) {
+              context.read<GoalsBloc>().add(const GoalsLoadRequested());
+            }
+          },
           destinations: const [
             NavigationDestination(
               icon: Icon(Icons.home_outlined),
