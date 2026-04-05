@@ -8,7 +8,9 @@ abstract class GoalRepository {
   Future<GoalEntity> createGoal({
     required String title,
     String? description,
-    required int duration,
+    required DateTime startDate,
+    required DateTime endDate,
+    required String priority,
   });
 
   Future<void> deleteGoal(String id);
