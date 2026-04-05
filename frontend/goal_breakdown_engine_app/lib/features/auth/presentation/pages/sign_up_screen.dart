@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:goal_breakdown_engine_app/core/theme/app_colors.dart';
+import 'package:goal_breakdown_engine_app/core/widgets/theme_toggle_button.dart';
 import 'package:goal_breakdown_engine_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:goal_breakdown_engine_app/features/auth/presentation/bloc/auth_event.dart';
 import 'package:goal_breakdown_engine_app/features/auth/presentation/bloc/auth_state.dart';
@@ -46,8 +47,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
         }
       },
       child: Scaffold(
-        body: Column(
+        body: Stack(
           children: [
+            Column(
+              children: [
             Container(
               width: double.infinity,
               padding: const EdgeInsets.fromLTRB(24, 44, 24, 28),
@@ -217,6 +220,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                   ),
                 ),
+              ),
+            ),
+              ],
+            ),
+            const Positioned(
+              top: 0,
+              right: 0,
+              child: SafeArea(
+                child: ThemeToggleIconButton(),
               ),
             ),
           ],

@@ -1,7 +1,9 @@
-abstract class AuthRepository {
-  Future<String> login({required String email, required String password});
+import 'package:goal_breakdown_engine_app/features/auth/domain/entities/auth_session.dart';
 
-  Future<String> signUp({
+abstract class AuthRepository {
+  Future<AuthSession> login({required String email, required String password});
+
+  Future<AuthSession> signUp({
     required String name,
     required String email,
     required String password,

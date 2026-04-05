@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:goal_breakdown_engine_app/core/data/local/app_settings_storage.dart';
+import 'package:goal_breakdown_engine_app/core/settings/app_settings_cubit.dart';
 import 'package:goal_breakdown_engine_app/core/theme/app_theme.dart';
+import 'package:goal_breakdown_engine_app/core/widgets/web_mobile_shell.dart';
 import 'package:goal_breakdown_engine_app/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:goal_breakdown_engine_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:goal_breakdown_engine_app/features/auth/presentation/bloc/auth_bloc.dart';
@@ -27,6 +30,7 @@ class AppRoot extends StatelessWidget {
     final dio = DioClientFactory(tokenMemory: tokenMemory).create();
     final tokenPrefs = TokenStoragePrefs();
     final onboardingPrefs = OnboardingPrefs();
+    final appSettingsStorage = AppSettingsStorage();
 
     final AuthRepository authRepo = AuthRepositoryImpl(
       dio: dio,
@@ -42,16 +46,30 @@ class AppRoot extends StatelessWidget {
         BlocProvider(create: (_) => AuthBloc(authRepository: authRepo)),
         BlocProvider(create: (_) => OnboardingCubit(prefs: onboardingPrefs)),
         BlocProvider(create: (_) => GoalsBloc(goalRepository: goalRepo)),
+        BlocProvider(
+          create: (_) => AppSettingsCubit(appSettingsStorage),
+        ),
       ],
       child: _ShellDeps(
         goalRepo: goalRepo,
         taskRepo: taskRepo,
         progressRepo: progressRepo,
-        child: MaterialApp(
-          title: 'ATOMIZE',
-          debugShowCheckedModeBanner: false,
-          theme: AppTheme.light(),
-          home: const AppGate(),
+        child: BlocBuilder<AppSettingsCubit, AppSettingsState>(
+          // Rebuild when theme changes or prefs finish loading so [themeMode] applies.
+          buildWhen: (p, c) =>
+              p.themeMode != c.themeMode || p.hydrated != c.hydrated,
+          builder: (context, settings) {
+            return MaterialApp(
+              title: 'ATOMIZE',
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.light(),
+              darkTheme: AppTheme.dark(),
+              themeMode: settings.themeMode,
+              builder: (context, child) =>
+                  wrapWebMobilePreview(context, child),
+              home: const AppGate(),
+            );
+          },
         ),
       ),
     );
@@ -72,7 +90,7 @@ class _ShellDeps extends InheritedWidget {
   final ProgressRepository progressRepo;
 
   static _ShellDeps of(BuildContext context) {
-    final r = context.dependOnInheritedWidgetOfExactType<_ShellDeps>();
+    final r = context.getInheritedWidgetOfExactType<_ShellDeps>();
     assert(r != null, '_ShellDeps not found');
     return r!;
   }

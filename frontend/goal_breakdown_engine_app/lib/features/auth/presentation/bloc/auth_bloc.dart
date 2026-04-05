@@ -32,11 +32,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(const AuthLoading());
     try {
-      final token = await _authRepository.login(
+      final session = await _authRepository.login(
         email: event.email.trim(),
         password: event.password,
       );
-      emit(AuthAuthenticated(token: token));
+      emit(
+        AuthAuthenticated(
+          token: session.token,
+          displayName: session.displayName,
+          email: session.email ?? event.email.trim(),
+        ),
+      );
     } on DioException catch (e) {
       emit(AuthFailure(_messageFromDio(e)));
     } catch (e) {
@@ -50,12 +56,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(const AuthLoading());
     try {
-      final token = await _authRepository.signUp(
+      final session = await _authRepository.signUp(
         name: event.name.trim(),
         email: event.email.trim(),
         password: event.password,
       );
-      emit(AuthAuthenticated(token: token));
+      emit(
+        AuthAuthenticated(
+          token: session.token,
+          displayName: session.displayName ?? event.name.trim(),
+          email: session.email ?? event.email.trim(),
+        ),
+      );
     } on DioException catch (e) {
       emit(AuthFailure(_messageFromDio(e)));
     } catch (e) {
