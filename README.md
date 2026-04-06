@@ -140,4 +140,4 @@ Advanced analytics and productivity insights
 Push notifications for daily task reminders
 License
 ```
-This project is intended for educational and personal productivity use. ```
+This project is intended for educational and personal productivity use. 
