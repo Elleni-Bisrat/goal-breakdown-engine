@@ -18,10 +18,17 @@ class AuthRepositoryImpl implements AuthRepository {
   final TokenMemory _memory;
 
   static AuthSession _sessionFromData(Map<String, dynamic> data, String token) {
+    final payload = data['data'];
+    final nested = payload is Map<String, dynamic> ? payload : null;
+
     String? pickName() {
       final u = data['user'];
       if (u is Map) {
         final n = u['name'] ?? u['displayName'] ?? u['fullName'];
+        if (n != null) return n.toString();
+      }
+      if (nested != null) {
+        final n = nested['name'] ?? nested['displayName'] ?? nested['fullName'];
         if (n != null) return n.toString();
       }
       final n = data['name'] ?? data['displayName'] ?? data['fullName'];
@@ -32,6 +39,10 @@ class AuthRepositoryImpl implements AuthRepository {
       final u = data['user'];
       if (u is Map) {
         final e = u['email'];
+        if (e != null) return e.toString();
+      }
+      if (nested != null) {
+        final e = nested['email'];
         if (e != null) return e.toString();
       }
       final e = data['email'];

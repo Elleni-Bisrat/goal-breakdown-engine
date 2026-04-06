@@ -1,12 +1,9 @@
 import 'package:goal_breakdown_engine_app/core/settings/app_settings_cubit.dart';
 import 'package:goal_breakdown_engine_app/features/auth/presentation/bloc/auth_state.dart';
 
-/// Resolves visible name/email: local overrides win, then auth session, then demo defaults.
+/// Resolves visible name/email: local overrides win, then authenticated user data.
 class UserDisplay {
   UserDisplay._();
-
-  static const demoName = 'Judith Smith';
-  static const demoEmail = 'judith@example.com';
 
   static String name(AppSettingsState settings, AuthState auth) {
     final o = settings.nameOverride;
@@ -19,7 +16,7 @@ class UserDisplay {
         return e.split('@').first;
       }
     }
-    return demoName;
+    return '';
   }
 
   static String email(AppSettingsState settings, AuthState auth) {
@@ -29,6 +26,6 @@ class UserDisplay {
       final e = auth.email;
       if (e != null && e.trim().isNotEmpty) return e.trim();
     }
-    return demoEmail;
+    return '';
   }
 }

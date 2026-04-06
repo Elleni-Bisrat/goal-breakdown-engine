@@ -12,10 +12,11 @@ class ProgressRepositoryImpl implements ProgressRepository {
   Future<DashboardStatsEntity> fetchDashboard() async {
     final res = await _dio.get<Map<String, dynamic>>('/progress/dashboard');
     final m = res.data!;
+    final progress = (m['overallProductivity'] ?? m['progress'] ?? 0) as num;
     return DashboardStatsEntity(
       totalTasks: (m['totalTasks'] as num?)?.toInt() ?? 0,
       completedTasks: (m['completedTasks'] as num?)?.toInt() ?? 0,
-      progressPercent: (m['progress'] as num?)?.toInt() ?? 0,
+      progressPercent: progress.toInt(),
     );
   }
 
@@ -23,10 +24,11 @@ class ProgressRepositoryImpl implements ProgressRepository {
   Future<GoalProgressEntity> fetchGoalProgress(String goalId) async {
     final res = await _dio.get<Map<String, dynamic>>('/progress/$goalId');
     final m = res.data!;
+    final progress = (m['completionPercentage'] ?? m['progress'] ?? 0) as num;
     return GoalProgressEntity(
       totalTasks: (m['totalTasks'] as num?)?.toInt() ?? 0,
       completedTasks: (m['completedTasks'] as num?)?.toInt() ?? 0,
-      progressPercent: (m['progress'] as num?)?.toInt() ?? 0,
+      progressPercent: progress.toInt(),
     );
   }
 }

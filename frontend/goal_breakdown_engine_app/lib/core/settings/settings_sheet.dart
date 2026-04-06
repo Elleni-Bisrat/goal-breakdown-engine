@@ -112,7 +112,7 @@ class _SettingsSheetBodyState extends State<_SettingsSheetBody> {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Shown on Home and Profile. Reset uses your sign-in name/email.',
+                      'Shown on Home and Profile. Changes apply after saving.',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
@@ -174,16 +174,6 @@ class _SettingsSheetBodyState extends State<_SettingsSheetBody> {
                         Navigator.pop(context);
                       },
                       child: const Text('Save'),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        context.read<AppSettingsCubit>().setProfileOverrides(
-                              clearName: true,
-                              clearEmail: true,
-                            );
-                        Navigator.pop(context);
-                      },
-                      child: const Text('Reset to sign-in defaults'),
                     ),
                   ],
                 ),

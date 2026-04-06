@@ -12,12 +12,42 @@ import 'package:goal_breakdown_engine_app/features/auth/presentation/bloc/auth_b
 import 'package:goal_breakdown_engine_app/features/auth/presentation/bloc/auth_state.dart';
 import 'package:goal_breakdown_engine_app/features/dashboard/presentation/bloc/dashboard_cubit.dart';
 import 'package:goal_breakdown_engine_app/features/goals/presentation/bloc/goal_detail_cubit.dart';
+import 'package:goal_breakdown_engine_app/features/goals/presentation/bloc/goals_bloc.dart';
+import 'package:goal_breakdown_engine_app/features/goals/presentation/bloc/goals_event.dart';
 import 'package:goal_breakdown_engine_app/features/goals/presentation/pages/goal_detail_screen.dart';
+import 'package:goal_breakdown_engine_app/features/goals/presentation/widgets/create_goal_dialog.dart';
 import 'package:goal_breakdown_engine_app/features/tasks/domain/entities/task_entity.dart';
 import 'package:goal_breakdown_engine_app/features/tasks/presentation/pages/task_detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
+
+  Future<void> _editGoal(BuildContext context, String goalId) async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final goal = await context.goalRepository.fetchGoal(goalId);
+      if (!context.mounted) return;
+      final data = await showEditGoalSheet(context, goal: goal);
+      if (data == null || !context.mounted) return;
+      await context.goalRepository.updateGoal(goalId, {
+        'title': data['title'] as String,
+        'description': data['description'] as String,
+        'startDate': _formatDate(data['startDate'] as DateTime),
+        'endDate': _formatDate(data['endDate'] as DateTime),
+        'priority': (data['priority'] as String).toLowerCase(),
+      });
+      if (!context.mounted) return;
+      context.read<DashboardCubit>().refresh();
+      context.read<GoalsBloc>().add(const GoalsLoadRequested());
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Goal updated successfully')),
+      );
+    } catch (e) {
+      messenger.showSnackBar(
+        SnackBar(content: Text('Failed to update goal: $e')),
+      );
+    }
+  }
 
   void _openTaskDetail(BuildContext context, TaskEntity task) {
     Navigator.of(context).push<void>(
@@ -103,7 +133,7 @@ class HomeScreen extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Hi, $name',
+                                    name.isNotEmpty ? 'Hi, $name' : 'Hi',
                                     style: theme.textTheme.titleMedium
                                         ?.copyWith(
                                       fontWeight: FontWeight.w800,
@@ -196,49 +226,65 @@ class HomeScreen extends StatelessWidget {
                     ),
                   )
                 else
-                  ...s.activeGoalsPreview.map(
-                    (g) => Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: AppSurfaceCard(
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) => BlocProvider(
-                                create: (_) => GoalDetailCubit(
-                                  goalRepository: context.goalRepository,
-                                  taskRepository: context.taskRepository,
-                                  progressRepository:
-                                      context.progressRepository,
-                                )..load(g.id),
-                                child: const GoalDetailScreen(),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final width = constraints.maxWidth;
+                      final crossAxis = width < 640 ? 1 : 2;
+                      return GridView.builder(
+                        itemCount: s.activeGoalsPreview.length,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: crossAxis,
+                          mainAxisSpacing: 10,
+                          crossAxisSpacing: 10,
+                          childAspectRatio: crossAxis == 1 ? 3.2 : 1.6,
+                        ),
+                        itemBuilder: (context, i) {
+                          final g = s.activeGoalsPreview[i];
+                          return AppSurfaceCard(
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => BlocProvider(
+                                    create: (_) => GoalDetailCubit(
+                                      goalRepository: context.goalRepository,
+                                      taskRepository: context.taskRepository,
+                                      progressRepository:
+                                          context.progressRepository,
+                                    )..load(g.id),
+                                    child: const GoalDetailScreen(),
+                                  ),
+                                ),
+                              );
+                            },
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 4,
+                              vertical: 4,
+                            ),
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 4,
+                              ),
+                              title: Text(
+                                g.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              trailing: IconButton(
+                                tooltip: 'Edit goal',
+                                onPressed: () => _editGoal(context, g.id),
+                                icon: const Icon(Icons.edit_outlined),
                               ),
                             ),
                           );
                         },
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 4,
-                          vertical: 4,
-                        ),
-                        child: ListTile(
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 4,
-                          ),
-                          title: Text(
-                            g.title,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          trailing: Icon(
-                            Icons.chevron_right_rounded,
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ),
-                    ),
+                      );
+                    },
                   ),
                 const SizedBox(height: 20),
                 Row(
@@ -337,6 +383,10 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  static String _formatDate(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 }
 

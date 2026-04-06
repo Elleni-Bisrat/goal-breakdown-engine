@@ -5,6 +5,7 @@ import 'package:goal_breakdown_engine_app/core/widgets/app_empty_state.dart';
 import 'package:goal_breakdown_engine_app/features/goals/presentation/bloc/goal_detail_cubit.dart';
 import 'package:goal_breakdown_engine_app/features/goals/presentation/bloc/goals_bloc.dart';
 import 'package:goal_breakdown_engine_app/features/goals/presentation/bloc/goals_event.dart';
+import 'package:goal_breakdown_engine_app/features/goals/presentation/widgets/create_goal_dialog.dart';
 
 class GoalDetailScreen extends StatelessWidget {
   const GoalDetailScreen({super.key});
@@ -63,7 +64,7 @@ class GoalDetailScreen extends StatelessWidget {
           );
         }
         final s = state as GoalDetailReady;
-        final pct = s.progress.progressPercent;
+        final pct = s.progress.progressPercent.clamp(0, 100);
 
         return Scaffold(
           appBar: AppBar(
@@ -291,14 +292,19 @@ class GoalDetailScreen extends StatelessWidget {
                                   (t) => ListTile(
                                     dense: true,
                                     contentPadding: EdgeInsets.zero,
-                                    leading: Icon(
-                                      t.isCompleted
-                                          ? Icons.check_circle
-                                          : Icons.radio_button_unchecked,
-                                      color: t.isCompleted
-                                          ? Colors.green
-                                          : Colors.grey,
-                                      size: 22,
+                                    leading: IconButton(
+                                      onPressed: () => context
+                                          .read<GoalDetailCubit>()
+                                          .toggleTaskStatus(t),
+                                      icon: Icon(
+                                        t.isCompleted
+                                            ? Icons.check_circle
+                                            : Icons.radio_button_unchecked,
+                                        color: t.isCompleted
+                                            ? Colors.green
+                                            : Colors.grey,
+                                        size: 22,
+                                      ),
                                     ),
                                     title: Text(
                                       t.title,
@@ -329,13 +335,19 @@ class GoalDetailScreen extends StatelessWidget {
                   ),
                 ),
                 icon: const Icon(Icons.edit_outlined, size: 20),
-                onPressed: () {
-                  // TODO: Implement edit functionality
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Edit feature coming soon'),
-                    ),
+                onPressed: () async {
+                  final data = await showEditGoalSheet(context, goal: s.goal);
+                  if (data == null || !context.mounted) return;
+                  await context.read<GoalDetailCubit>().updateGoal(
+                    title: data['title'] as String,
+                    description: data['description'] as String,
+                    startDate: data['startDate'] as DateTime,
+                    endDate: data['endDate'] as DateTime,
+                    priority: data['priority'] as String,
                   );
+                  if (context.mounted) {
+                    context.read<GoalsBloc>().add(const GoalsLoadRequested());
+                  }
                 },
                 label: const Text('Edit Goal'),
               ),
