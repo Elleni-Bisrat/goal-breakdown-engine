@@ -22,6 +22,7 @@ Atomize is a mobile productivity app built with **Flutter**  and **Node** that h
 * Goal tracking dashboard
 * Task management screens
 * Progress visualization
+* Flutter clean architecture
 
 ---
 
