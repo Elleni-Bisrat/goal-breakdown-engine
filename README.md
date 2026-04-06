@@ -92,21 +92,24 @@ git clone https://github.com/Elleni-Bisrat/goal-breakdown-engine.git
 cd goal-breakdown-engine
 ```
 2. Set up the backend
-cd backend
+```cd backend
 npm install
 npm start
+```
 3. Set up the frontend
-cd ../frontend
+```cd ../frontend
 flutter pub get
 flutter run
+```
 Environment Variables
 
-Create a .env file in the backend directory and add your environment variables such as:
-
+```Create a .env file in the backend directory and add your environment variables such as:
 PORT=5000
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_secret_key
+```
 Folder Structure
+```
 goal-breakdown-engine/
 ├── backend/
 │   ├── config/
@@ -126,7 +129,9 @@ goal-breakdown-engine/
     ├── screens/
     ├── blocs/
     └── main.dart
+```
 Future Improvements
+```
 AI-powered goal suggestions
 Personalized task generation
 Calendar and reminder integration
@@ -134,5 +139,5 @@ Dark mode support
 Advanced analytics and productivity insights
 Push notifications for daily task reminders
 License
-
+```
 This project is intended for educational and personal productivity use. ```
