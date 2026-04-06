@@ -72,6 +72,67 @@ class GoalDetailCubit extends Cubit<GoalDetailState> {
     }
   }
 
+  Future<void> updateGoal({
+    required String title,
+    required String description,
+    required DateTime startDate,
+    required DateTime endDate,
+    required String priority,
+  }) async {
+    final s = state;
+    if (s is! GoalDetailReady) return;
+    final updatedGoal = await _goalRepository.updateGoal(s.goal.id, {
+      'title': title,
+      'description': description,
+      'startDate': _formatDate(startDate),
+      'endDate': _formatDate(endDate),
+      'priority': priority.toLowerCase(),
+    });
+    emit(s.copyWith(goal: updatedGoal));
+  }
+
+  Future<void> toggleTaskStatus(TaskEntity task) async {
+    final s = state;
+    if (s is! GoalDetailReady) return;
+    try {
+      final nextStatus = task.isCompleted ? 'pending' : 'completed';
+      final updatedTask = await _taskRepository.updateTask(
+        task.id,
+        status: nextStatus,
+      );
+
+      final nextGroups = s.milestoneGroups
+          .map(
+            (g) => MilestoneGroup(
+              index: g.index,
+              label: g.label,
+              tasks: g.tasks
+                  .map((t) => t.id == updatedTask.id ? updatedTask : t)
+                  .toList(),
+            ),
+          )
+          .toList();
+
+      final flatTasks = <TaskEntity>[
+        for (final g in nextGroups) ...g.tasks,
+      ];
+      final total = flatTasks.length;
+      final completed = flatTasks.where((t) => t.isCompleted).length;
+      final percent = total == 0 ? 0 : ((completed / total) * 100).round();
+
+      emit(
+        s.copyWith(
+          milestoneGroups: nextGroups,
+          progress: GoalProgressEntity(
+            totalTasks: total,
+            completedTasks: completed,
+            progressPercent: percent,
+          ),
+        ),
+      );
+    } catch (_) {}
+  }
+
   static List<MilestoneGroup> _groupTasks(List<TaskEntity> tasks) {
     final map = <int, List<TaskEntity>>{};
     for (final t in tasks) {
@@ -89,6 +150,10 @@ class GoalDetailCubit extends Cubit<GoalDetailState> {
     final d = e.response?.data;
     if (d is Map && d['message'] != null) return d['message'].toString();
     return e.message ?? 'Error';
+  }
+
+  static String _formatDate(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 }
 

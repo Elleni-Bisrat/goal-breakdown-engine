@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:goal_breakdown_engine_app/core/theme/app_colors.dart';
+import 'package:goal_breakdown_engine_app/core/widgets/app_empty_state.dart';
 import 'package:goal_breakdown_engine_app/features/goals/presentation/bloc/goal_detail_cubit.dart';
 import 'package:goal_breakdown_engine_app/features/goals/presentation/bloc/goals_bloc.dart';
 import 'package:goal_breakdown_engine_app/features/goals/presentation/bloc/goals_event.dart';
+import 'package:goal_breakdown_engine_app/features/goals/presentation/widgets/create_goal_dialog.dart';
 
 class GoalDetailScreen extends StatelessWidget {
   const GoalDetailScreen({super.key});
@@ -19,23 +21,55 @@ class GoalDetailScreen extends StatelessWidget {
       },
       builder: (context, state) {
         if (state is GoalDetailLoading || state is GoalDetailInitial) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
+          final theme = Theme.of(context);
+          return Scaffold(
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(
+                    width: 40,
+                    height: 40,
+                    child: CircularProgressIndicator(strokeWidth: 3),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Loading goal…',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           );
         }
         if (state is GoalDetailError) {
           return Scaffold(
-            appBar: AppBar(),
-            body: Center(child: Text(state.message)),
+            appBar: AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_rounded),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ),
+            body: AppEmptyState(
+              icon: Icons.warning_amber_rounded,
+              title: 'Something went wrong',
+              subtitle: state.message,
+              action: FilledButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Go back'),
+              ),
+            ),
           );
         }
         final s = state as GoalDetailReady;
-        final pct = s.progress.progressPercent;
+        final pct = s.progress.progressPercent.clamp(0, 100);
 
         return Scaffold(
           appBar: AppBar(
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back),
+              icon: const Icon(Icons.arrow_back_rounded),
               onPressed: () => Navigator.of(context).pop(),
             ),
             title: Text(
@@ -45,34 +79,32 @@ class GoalDetailScreen extends StatelessWidget {
             ),
           ),
           body: ListView(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 36),
             children: [
-              // Progress section
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SizedBox(
-                    width: 110,
-                    height: 110,
+                    width: 112,
+                    height: 112,
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
                         SizedBox(
-                          width: 110,
-                          height: 110,
+                          width: 112,
+                          height: 112,
                           child: CircularProgressIndicator(
                             value: pct / 100,
-                            strokeWidth: 10,
-                            backgroundColor: Colors.grey.shade200,
+                            strokeWidth: 9,
+                            strokeCap: StrokeCap.round,
+                            backgroundColor: AppColors.goalCard,
                             color: AppColors.primary,
                           ),
                         ),
                         Text(
                           '$pct%',
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(fontWeight: FontWeight.w800),
                         ),
                       ],
                     ),
@@ -103,7 +135,7 @@ class GoalDetailScreen extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: _getPriorityColor(
                               s.goal.priority,
-                            ).withOpacity(0.1),
+                            ).withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -122,10 +154,9 @@ class GoalDetailScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
 
-              // Date range
               Card(
                 child: Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(18),
                   child: Row(
                     children: [
                       Expanded(
@@ -150,7 +181,10 @@ class GoalDetailScreen extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const Icon(Icons.arrow_forward, color: Colors.grey),
+                      Icon(
+                        Icons.arrow_forward_rounded,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
@@ -182,7 +216,7 @@ class GoalDetailScreen extends StatelessWidget {
               if (s.goal.description != null && s.goal.description!.isNotEmpty)
                 Card(
                   child: Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(18),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -205,14 +239,19 @@ class GoalDetailScreen extends StatelessWidget {
               // Milestones section
               Row(
                 children: [
-                  const Text(
+                  Text(
                     'Milestones',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                   const Spacer(),
                   Text(
                     '${s.milestoneGroups.length} milestones',
-                    style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ),
@@ -227,9 +266,19 @@ class GoalDetailScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       ListTile(
-                        title: Text(g.label),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
+                        title: Text(
+                          g.label,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
                         trailing: Icon(
-                          open ? Icons.expand_less : Icons.expand_more,
+                          open
+                              ? Icons.expand_less_rounded
+                              : Icons.expand_more_rounded,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         onTap: () =>
                             context.read<GoalDetailCubit>().toggleMilestone(i),
@@ -243,14 +292,19 @@ class GoalDetailScreen extends StatelessWidget {
                                   (t) => ListTile(
                                     dense: true,
                                     contentPadding: EdgeInsets.zero,
-                                    leading: Icon(
-                                      t.isCompleted
-                                          ? Icons.check_circle
-                                          : Icons.radio_button_unchecked,
-                                      color: t.isCompleted
-                                          ? Colors.green
-                                          : Colors.grey,
-                                      size: 22,
+                                    leading: IconButton(
+                                      onPressed: () => context
+                                          .read<GoalDetailCubit>()
+                                          .toggleTaskStatus(t),
+                                      icon: Icon(
+                                        t.isCompleted
+                                            ? Icons.check_circle
+                                            : Icons.radio_button_unchecked,
+                                        color: t.isCompleted
+                                            ? Colors.green
+                                            : Colors.grey,
+                                        size: 22,
+                                      ),
                                     ),
                                     title: Text(
                                       t.title,
@@ -273,29 +327,50 @@ class GoalDetailScreen extends StatelessWidget {
               const SizedBox(height: 16),
 
               // Action buttons
-              OutlinedButton(
+              OutlinedButton.icon(
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Colors.green.shade800,
-                  side: BorderSide(color: Colors.green.shade600),
+                  side: BorderSide(
+                    color: Colors.green.shade600.withValues(alpha: 0.65),
+                  ),
                 ),
-                onPressed: () {
-                  // TODO: Implement edit functionality
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Edit feature coming soon')),
+                icon: const Icon(Icons.edit_outlined, size: 20),
+                onPressed: () async {
+                  final data = await showEditGoalSheet(context, goal: s.goal);
+                  if (data == null || !context.mounted) return;
+                  await context.read<GoalDetailCubit>().updateGoal(
+                    title: data['title'] as String,
+                    description: data['description'] as String,
+                    startDate: data['startDate'] as DateTime,
+                    endDate: data['endDate'] as DateTime,
+                    priority: data['priority'] as String,
                   );
+                  if (context.mounted) {
+                    context.read<GoalsBloc>().add(const GoalsLoadRequested());
+                  }
                 },
-                child: const Text('Edit Goal'),
+                label: const Text('Edit Goal'),
               ),
               const SizedBox(height: 12),
-              OutlinedButton(
+              OutlinedButton.icon(
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.red.shade700,
-                  side: BorderSide(color: Colors.red.shade400),
+                  foregroundColor: Theme.of(context).colorScheme.error,
+                  side: BorderSide(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.error.withValues(alpha: 0.45),
+                  ),
                 ),
+                icon: const Icon(Icons.delete_outline_rounded, size: 20),
                 onPressed: () async {
                   final ok = await showDialog<bool>(
                     context: context,
                     builder: (ctx) => AlertDialog(
+                      icon: Icon(
+                        Icons.delete_forever_outlined,
+                        color: Theme.of(ctx).colorScheme.error,
+                        size: 32,
+                      ),
                       title: const Text('Delete goal?'),
                       content: const Text('This cannot be undone.'),
                       actions: [
@@ -303,12 +378,12 @@ class GoalDetailScreen extends StatelessWidget {
                           onPressed: () => Navigator.pop(ctx, false),
                           child: const Text('Cancel'),
                         ),
-                        TextButton(
-                          onPressed: () => Navigator.pop(ctx, true),
-                          child: Text(
-                            'Delete',
-                            style: TextStyle(color: Colors.red.shade700),
+                        FilledButton(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: Theme.of(ctx).colorScheme.error,
                           ),
+                          onPressed: () => Navigator.pop(ctx, true),
+                          child: const Text('Delete'),
                         ),
                       ],
                     ),
@@ -317,7 +392,7 @@ class GoalDetailScreen extends StatelessWidget {
                     context.read<GoalDetailCubit>().deleteGoal();
                   }
                 },
-                child: const Text('Delete Goal'),
+                label: const Text('Delete Goal'),
               ),
             ],
           ),

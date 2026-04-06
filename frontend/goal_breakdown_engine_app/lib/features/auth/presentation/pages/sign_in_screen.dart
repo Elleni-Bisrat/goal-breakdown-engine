@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:goal_breakdown_engine_app/core/theme/app_colors.dart';
+import 'package:goal_breakdown_engine_app/core/widgets/theme_toggle_button.dart';
 import 'package:goal_breakdown_engine_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:goal_breakdown_engine_app/features/auth/presentation/bloc/auth_event.dart';
 import 'package:goal_breakdown_engine_app/features/auth/presentation/bloc/auth_state.dart';
@@ -31,37 +32,62 @@ class _SignInScreenState extends State<SignInScreen> {
       listenWhen: (p, c) => c is AuthFailure,
       listener: (context, state) {
         if (state is AuthFailure) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.message)));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+            ),
+          );
         }
       },
       child: Scaffold(
-        body: Column(
+        body: Stack(
           children: [
+            Column(
+              children: [
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(24, 56, 24, 32),
-              decoration: const BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.vertical(
+              padding: const EdgeInsets.fromLTRB(24, 56, 24, 36),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppColors.primary,
+                    AppColors.primary.withValues(alpha: 0.92),
+                    AppColors.secondary,
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: const BorderRadius.vertical(
                   bottom: Radius.circular(32),
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.25),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
               ),
               child: const Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Hello, Welcome Back',
-                    style: TextStyle(color: Colors.white70, fontSize: 16),
+                    style: TextStyle(
+                      color: Color(0xE6FFFFFF),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                  SizedBox(height: 6),
+                  SizedBox(height: 8),
                   Text(
                     'Sign In!',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 28,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.5,
                     ),
                   ),
                 ],
@@ -71,11 +97,18 @@ class _SignInScreenState extends State<SignInScreen> {
               child: Transform.translate(
                 offset: const Offset(0, -20),
                 child: Container(
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.vertical(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(28),
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.06),
+                        blurRadius: 24,
+                        offset: const Offset(0, -4),
+                      ),
+                    ],
                   ),
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(24),
@@ -174,6 +207,15 @@ class _SignInScreenState extends State<SignInScreen> {
                     ),
                   ),
                 ),
+              ),
+            ),
+              ],
+            ),
+            const Positioned(
+              top: 0,
+              right: 0,
+              child: SafeArea(
+                child: ThemeToggleIconButton(),
               ),
             ),
           ],

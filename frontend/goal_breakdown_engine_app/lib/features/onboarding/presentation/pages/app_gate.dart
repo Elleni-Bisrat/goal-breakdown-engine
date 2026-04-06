@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:goal_breakdown_engine_app/core/theme/app_colors.dart';
 import 'package:goal_breakdown_engine_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:goal_breakdown_engine_app/features/auth/presentation/bloc/auth_event.dart';
 import 'package:goal_breakdown_engine_app/features/auth/presentation/bloc/auth_state.dart';
@@ -42,9 +43,7 @@ class _AppGateState extends State<AppGate> {
     return BlocBuilder<OnboardingCubit, OnboardingState>(
       builder: (context, onState) {
         if (onState is OnboardingInitial) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
+          return const _GateLoadingScaffold(message: 'Preparing app…');
         }
         if (onState is OnboardingNeeded) {
           return const OnboardingScreen();
@@ -52,9 +51,7 @@ class _AppGateState extends State<AppGate> {
         return BlocBuilder<AuthBloc, AuthState>(
           builder: (context, authState) {
             if (authState is AuthInitial || authState is AuthLoading) {
-              return const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              );
+              return const _GateLoadingScaffold(message: 'Checking session…');
             }
             if (authState is AuthAuthenticated) {
               return const MainShell();
@@ -63,6 +60,44 @@ class _AppGateState extends State<AppGate> {
           },
         );
       },
+    );
+  }
+}
+
+class _GateLoadingScaffold extends StatelessWidget {
+  const _GateLoadingScaffold({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.hexagon_outlined,
+              size: 40,
+              color: AppColors.primary.withValues(alpha: 0.85),
+            ),
+            const SizedBox(height: 20),
+            const SizedBox(
+              width: 32,
+              height: 32,
+              child: CircularProgressIndicator(strokeWidth: 3),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              message,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
