@@ -29,7 +29,16 @@ export const signUp = async (req, res, next) => {
     res.status(201).json({
       success: true,
       token,
-      data: newUser,
+      user: {
+        _id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+      },
+      data: {
+        _id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+      },
       message: "sign up successfully",
     });
   } catch (error) {
@@ -58,6 +67,11 @@ export const signIn = async (req, res, next) => {
     res.json({
       token,
       userId: user._id,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+      },
       message: "sign in successfully",
     });
   } catch (error) {

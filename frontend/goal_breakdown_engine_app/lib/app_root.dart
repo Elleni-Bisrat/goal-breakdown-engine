@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:goal_breakdown_engine_app/core/data/local/app_settings_storage.dart';
 import 'package:goal_breakdown_engine_app/core/settings/app_settings_cubit.dart';
 import 'package:goal_breakdown_engine_app/core/theme/app_theme.dart';
-import 'package:goal_breakdown_engine_app/core/widgets/web_mobile_shell.dart';
 import 'package:goal_breakdown_engine_app/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:goal_breakdown_engine_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:goal_breakdown_engine_app/features/auth/presentation/bloc/auth_bloc.dart';
@@ -65,8 +64,6 @@ class AppRoot extends StatelessWidget {
               theme: AppTheme.light(),
               darkTheme: AppTheme.dark(),
               themeMode: settings.themeMode,
-              builder: (context, child) =>
-                  wrapWebMobilePreview(context, child),
               home: const AppGate(),
             );
           },

@@ -186,17 +186,17 @@ class HomeScreen extends StatelessWidget {
                         _StatCard(
                           color: AppColors.purpleStat,
                           value: '${s.activeGoalsCount}',
-                          label: 'Goals',
+                          label: 'Total Goals',
                         ),
                         _StatCard(
                           color: AppColors.orangeStat,
-                          value: '${s.tasksInProgress}',
-                          label: 'Tasks',
+                          value: '${s.stats.totalTasks}',
+                          label: 'Total Tasks',
                         ),
                         _StatCard(
                           color: AppColors.greenStat,
-                          value: '${s.completedToday}',
-                          label: 'Completed',
+                          value: '${s.stats.completedTasks}',
+                          label: 'Completed Tasks',
                         ),
                         _StatCard(
                           color: AppColors.blueStat,
